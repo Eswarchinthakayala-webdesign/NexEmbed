@@ -44,6 +44,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { ThreeBoard3 } from "../components/ThreeBoard3";
+import { useNavigate } from "react-router-dom";
 // ---------------- THEME & CONSTANTS ----------------
 const ICONS={
     Play,
@@ -1366,15 +1367,33 @@ function ThreeBoard({ running }) {
 
 // ---------------- Mobile Overlay ----------------
 function MobileOverlay({ show }) {
+  const navigate=useNavigate()
   if (!show) return null;
   return (
-    <div className="fixed inset-0 bg-emerald-950/95 z-[80] flex flex-col items-center justify-center p-6 text-center">
-      <Shield className="h-12 w-12 text-emerald-400 mb-4" />
-      <h2 className="text-xl font-semibold mb-2">Desktop Recommended</h2>
-      <p className="text-emerald-300/80 mb-4">
-        The Weather Station Wiring Lab works best on larger screens.  
-        Please use a desktop or laptop for full drag-and-wire features.
-      </p>
+    <div className="fixed inset-0 z-[999] bg-emerald-950/95 backdrop-blur-sm grid place-items-center p-6">
+      <div className="max-w-md w-full rounded-2xl border border-emerald-700/60 bg-emerald-900/50 p-6">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="h-9 w-9 rounded-xl bg-emerald-600 grid place-items-center">
+            <Cpu className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <div className="text-lg font-semibold">Desktop Simulator</div>
+            <div className="text-emerald-300/75 text-sm">Best experience on a larger screen</div>
+          </div>
+        </div>
+        <p className="text-sm text-emerald-100/90">
+          For the best experience, open this simulator on a desktop. Instruments and wiring interactions are optimized for larger viewports.
+        </p>
+        <p className="text-sm text-red-400/90">
+          Enjoy NexEmbed by reading the Details of embedded systems
+        </p>
+        
+        <div className="mt-4 flex justify-end">
+          <Button className="bg-emerald-600 hover:bg-emerald-500 cursor-pointer" onClick={() => navigate("/details")}>
+            Got it
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

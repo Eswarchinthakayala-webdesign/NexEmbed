@@ -236,8 +236,8 @@ export default function DocumentationPage() {
             aria-current={active ? "true" : undefined}
             className={[
               "w-full text-left px-4 py-2 rounded-lg transition-all",
-              "text-gray-300 hover:text-emerald-400 hover:bg-emerald-400/8",
-              active ? "text-emerald-300 bg-emerald-400/6 border-l-2 border-emerald-400/60" : "border-l-2 border-transparent",
+              "text-gray-300 hover:text-emerald-400 hover:bg-emerald-400/50 cursor-pointer",
+              active ? "text-emerald-300 bg-emerald-400/50 border-l-4 border-emerald-400/60" : "border-l-2 border-transparent",
             ].join(" ")}
           >
             {title}
@@ -248,9 +248,9 @@ export default function DocumentationPage() {
   );
 
   return (
-    <div className="relative flex pt-26 min-h-screen bg-[#0b0f17] text-gray-100">
+    <div className="relative flex pt-26 min-h-screen bg-black text-gray-100">
       {/* Sidebar */}
-      <aside className="fixed top-24 left-6 w-64 hidden lg:flex flex-col gap-3 z-40">
+      <aside className="fixed top-24 left-6 w-64 hidden border-1 border-emerald-500/50 rounded-2xl p-3 lg:flex flex-col gap-3 z-40">
         {sidebar}
       </aside>
 
@@ -269,7 +269,7 @@ export default function DocumentationPage() {
               initial={{ opacity: 0, y: -12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45 }}
-              className="text-4xl md:text-5xl font-extrabold text-emerald-400 mb-8"
+              className="text-4xl md:text-5xl font-extrabold text-emerald-500 mb-8"
             >
               Documentation
             </motion.h1>
@@ -280,7 +280,7 @@ export default function DocumentationPage() {
                   key={id}
                   id={id}
                   ref={(el) => (sectionRefs.current[id] = el)}
-                  className="scroll-mt-28 bg-[#111827]/60 backdrop-blur-xl rounded-2xl border border-emerald-400/20 shadow-xl shadow-emerald-900/30 p-8"
+                  className="scroll-mt-28 bg-gray-950 backdrop-blur-xl rounded-2xl border border-emerald-400/50 shadow-xl shadow-emerald-900/30 p-8"
                 >
                   <div className="flex items-center gap-3 mb-4">
                     <Icon className="text-emerald-400 w-6 h-6" />

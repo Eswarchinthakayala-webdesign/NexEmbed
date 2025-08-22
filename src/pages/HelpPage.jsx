@@ -121,7 +121,7 @@ export default function HelpPage() {
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   key={i}
-                  className="flex items-center gap-3 p-4 rounded-xl border border-emerald-400/20 bg-[#1a2234]/60 hover:bg-[#1f2a3d]/70 transition cursor-pointer"
+                  className="flex items-center gap-3 p-4 rounded-xl border border-emerald-400/20 bg-black hover:bg-black/50 transition cursor-pointer"
                 >
                   <Icon className="text-emerald-400 w-6 h-6" />
                   <span className="text-gray-200">{text}</span>

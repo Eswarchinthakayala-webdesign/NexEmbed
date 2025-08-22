@@ -349,7 +349,7 @@ function Header({ onOpenDocs }) {
     const navigate=useNavigate()
   return (
     <header className={`py-6  ${EMERALD.text} border-b ${EMERALD.border}`}>
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-6">
+      <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-4">
           <div className="rounded-2xl p-3 bg-emerald-800/30 border border-emerald-700">
             <Grid className="w-6 h-6 text-emerald-300" />
@@ -467,7 +467,7 @@ function ComponentDetail({ item, onClose, onRemove }) {
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
         transition={{ type: "spring", stiffness: 260, damping: 30 }}
-        className={`fixed right-6 top-20 bottom-6 w-[520px] rounded-2xl p-6 shadow-2xl bg-emerald-600 border ${EMERALD.border} overflow-auto`}
+        className={`fixed right-6 top-20 bottom-6 sm:w-[520px] w-[400px] rounded-2xl p-6 shadow-2xl bg-emerald-600 border ${EMERALD.border} overflow-auto`}
       >
         <div className="flex  items-start justify-between gap-4 mb-4">
           <div>

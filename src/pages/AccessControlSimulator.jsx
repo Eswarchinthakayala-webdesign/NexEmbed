@@ -53,6 +53,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { ThreeBoard2 } from "../components/ThreeBoard2";
+import { useNavigate } from "react-router-dom";
 
 // ---------------- THEME & CONSTANTS ----------------
 const SURFACE = "bg-emerald-950 text-emerald-50";
@@ -991,6 +992,7 @@ function LogicAnalyzer({ running }) {
 
 // ---------------- MOBILE OVERLAY ----------------
 function MobileOverlay({ show }) {
+  const navigate=useNavigate()
   if (!show) return null;
   return (
     <div className="fixed inset-0 z-[999] bg-emerald-950/95 backdrop-blur-sm grid place-items-center p-6">
@@ -1007,8 +1009,12 @@ function MobileOverlay({ show }) {
         <p className="text-sm text-emerald-100/90">
           For the best experience, open this simulator on a desktop. Instruments and wiring interactions are optimized for larger viewports.
         </p>
+        <p className="text-sm text-red-400/90">
+          Enjoy NexEmbed by reading the Details of embedded systems
+        </p>
+        
         <div className="mt-4 flex justify-end">
-          <Button className="bg-emerald-600 hover:bg-emerald-500" onClick={() => window.scrollTo({ top: 0 })}>
+          <Button className="bg-emerald-600 hover:bg-emerald-500 cursor-pointer" onClick={() => navigate("/details")}>
             Got it
           </Button>
         </div>
