@@ -59,6 +59,7 @@ import {
   Code2,
   Bug,
   Wrench,
+  Shield,
   GaugeCircle,
 } from "lucide-react";
 
@@ -1245,6 +1246,21 @@ function Toolbar({
   );
 }
 
+
+function MobileOverlay({ show }) {
+  if (!show) return null;
+  return (
+    <div className="fixed inset-0 bg-emerald-950/95 z-[80] flex flex-col items-center justify-center p-6 text-center">
+      <Shield className="h-12 w-12 text-emerald-400 mb-4" />
+      <h2 className="text-xl font-semibold mb-2">Desktop Recommended</h2>
+      <p className="text-emerald-300/80 mb-4">
+        The Simulator  works best on larger screens.  
+        Please use a desktop or laptop for full drag-and-wire features.
+      </p>
+    </div>
+  );
+}
+
 // ============================================================================
 // Undo/Redo history hook (unchanged logic)
 // ============================================================================
@@ -1316,6 +1332,13 @@ export default function SimulatorPage() {
   const fileRef = useRef(null);
 
   const { push, undo, redo } = useHistory();
+  const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+      const onResize = () => setIsMobile(window.innerWidth < 1024);
+      onResize();
+      window.addEventListener("resize", onResize);
+      return () => window.removeEventListener("resize", onResize);
+    }, []);
 
   useEffect(() => {
     push();
@@ -1500,7 +1523,9 @@ export default function SimulatorPage() {
           </div>
         </div>
       </div>
+      <MobileOverlay show={isMobile} />
     </div>
+    
   );
 }
 

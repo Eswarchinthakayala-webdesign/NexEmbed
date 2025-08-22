@@ -118,21 +118,31 @@ export default function ProjectsPage() {
                     </div>
                     <Badge className="bg-emerald-800 hover:bg-emerald-800">Example</Badge>
                   </CardHeader>
-                  <CardContent className="flex items-center justify-between">
-                    <div className="flex gap-2">
-                      {p.tags.map((t) => (
-                        <Badge key={t} variant="outline" className="border-emerald-700 text-emerald-300">
-                          {t}
-                        </Badge>
-                      ))}
-                    </div>
-                    <Button
-                      onClick={() => navigate(p.to)}
-                      className="bg-emerald-600 hover:bg-emerald-500 cursor-pointer text-white rounded-xl"
-                    >
-                      Open in Simulator <ArrowRight className=" w-4 h-4" />
-                    </Button>
-                  </CardContent>
+                 <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  {/* Tags */}
+  <div className="flex flex-wrap gap-2 justify-start sm:justify-start">
+    {p.tags.map((t) => (
+      <Badge
+        key={t}
+        variant="outline"
+        className="border-emerald-700 text-emerald-300"
+      >
+        {t}
+      </Badge>
+    ))}
+  </div>
+
+  {/* Button */}
+  <div className="flex justify-start sm:justify-end w-full sm:w-auto">
+    <Button
+      onClick={() => navigate(p.to)}
+      className="bg-emerald-600 hover:bg-emerald-500 cursor-pointer text-white rounded-xl px-4 py-2"
+    >
+      <span className="mr-2">Open in Simulator</span>
+      <ArrowRight className="w-4 h-4" />
+    </Button>
+  </div>
+</CardContent>
                 </Card>
               </motion.div>
             );
