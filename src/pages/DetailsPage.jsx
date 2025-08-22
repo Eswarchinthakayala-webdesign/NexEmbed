@@ -61,7 +61,7 @@ import { useNavigate } from "react-router-dom";
 
 const EMERALD = {
   bg: "bg-emerald-950",
-  surface: "bg-black/50",
+  surface: "bg-gray-950",
   panel: "bg-emerald-900/50",
   border: "border-emerald-700",
   text: "text-emerald-100",
@@ -483,14 +483,14 @@ function ComponentDetail({ item, onClose, onRemove }) {
         </div>
 
         <div className="space-y-4">
-          <Card className={`bg-black ${EMERALD.border}`}>
+          <Card className={`bg-gray-950 ${EMERALD.border}`}>
             <CardContent>
               <h4 className="font-semibold text-emerald-200 mb-2">Professional summary</h4>
               <p className="text-emerald-200/90">Detailed technical summary, recommended suppliers, lifecycle considerations, and production notes.</p>
             </CardContent>
           </Card>
 
-          <Card className={`bg-black ${EMERALD.border}`}>
+          <Card className={`bg-gray-950 ${EMERALD.border}`}>
             <CardContent>
               <h4 className="font-semibold text-emerald-200 mb-2">Specification highlights</h4>
               <div className="grid grid-cols-2 gap-2 text-emerald-200 text-sm">
@@ -514,7 +514,7 @@ function ComponentDetail({ item, onClose, onRemove }) {
             </CardContent>
           </Card>
 
-          <Card className={`bg-black ${EMERALD.border}`}>
+          <Card className={`bg-gray-950 ${EMERALD.border}`}>
             <CardContent>
               <h4 className="font-semibold text-emerald-200 mb-2">Design notes & checklist</h4>
               <ul className="list-disc pl-5 text-emerald-200 space-y-2">
@@ -526,7 +526,7 @@ function ComponentDetail({ item, onClose, onRemove }) {
             </CardContent>
           </Card>
 
-          <Card className={`bg-black ${EMERALD.border}`}>
+          <Card className={`bg-gray-950 ${EMERALD.border}`}>
             <CardContent>
               <h4 className="font-semibold text-emerald-200 mb-2">Integration example</h4>
               <PrettyCode>{`// pseudo-code: safe command handling
@@ -620,7 +620,7 @@ export default function DetailsPage() {
   }
 
   return (
-    <div className={`bg-black/70 ${EMERALD.text} pt-20 min-h-screen`}> 
+    <div className={`bg-gray-950 ${EMERALD.text} pt-20 min-h-screen`}> 
       <Header onOpenDocs={() => setOpenDocs((v) => !v)} />
 
       <main className="max-w-8xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -894,7 +894,7 @@ publish("telemetry", packed_samples, { encrypted: true });`}</PrettyCode>
 
       <AnimatePresence>
         {openDocs && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className={`fixed left-6 bottom-6 w-[360px] rounded-2xl p-4 bg-black border ${EMERALD.border}`}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className={`fixed left-6 bottom-6 w-[360px] rounded-2xl p-4 bg-gray-950 border ${EMERALD.border}`}>
             <div className="flex items-center justify-between mb-2">
               <div>
                 <p className="text-emerald-200 font-semibold">Quick Docs</p>

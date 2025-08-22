@@ -16,6 +16,7 @@ import AccessControlSimulator from "./pages/AccessControlSimulator";
 import LineFollowerBotSimulator from "./pages/LineFollowerBotSimulator";
 import WeatherStationSimulator from "./pages/WeatherStationSimulator";
 import DetailsPage from "./pages/DetailsPage";
+import EmbeddedESQuizPro from "./pages/EmbeddedESQuizPro";
 // Sonner
 import { Toaster } from "sonner";
 
@@ -47,6 +48,7 @@ function App() {
             <Route path="/line-follower-bot" element={<LineFollowerBotSimulator />} />
             <Route path="/weather-station" element={<WeatherStationSimulator />} />
             <Route path="/details" element={<DetailsPage/>}/>
+            <Route path="/quiz" element={<EmbeddedESQuizPro/>}/>
           </Routes>
         </main>
 

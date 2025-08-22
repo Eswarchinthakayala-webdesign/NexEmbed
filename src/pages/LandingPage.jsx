@@ -50,9 +50,10 @@ import {
   Grid,
   CheckCircle2,
   WandSparkles,
+  Brain,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
+import QuizLanding from "../components/QuizLanding";
 /* ------------------------------ Theme tokens ------------------------------ */
 const brand = {
   bg: "#0b1016", // base background (very dark blue/green)
@@ -983,6 +984,103 @@ function Showcase() {
   );
 }
 
+/* ---------------------Quiz---------------------- */
+
+function Quiz() {
+  const [step, setStep] = useState(0);
+
+  // cycle steps: 0=question, 1=options, 2=selected, 3=result
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStep((s) => (s + 1) % 4);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="min-h-screen max-w-7xl mx-auto w-full bg-emerald-950 text-white flex flex-col md:flex-row items-center justify-center px-6 py-12">
+      {/* Left: Info */}
+      <div className="md:w-1/2 text-center md:text-left space-y-4">
+        <div className="flex items-center justify-center md:justify-start gap-2 text-emerald-400">
+          <Brain size={32} />
+          <h1 className="text-3xl font-bold">Interactive Quiz Experience</h1>
+        </div>
+        <p className="text-lg text-emerald-100/80 max-w-lg">
+          Challenge your mind with fun, engaging quizzes. Answer questions,
+          choose the right option, and see instant results — now with a smooth
+          3D animation that feels alive!
+        </p>
+      </div>
+
+      {/* Right: Animated Quiz */}
+      <div className="md:w-1/2 flex justify-center mt-10 md:mt-0 perspective-1000">
+        <div className="w-80 h-64 relative">
+          <AnimatePresence mode="wait">
+            {step === 0 && (
+              <motion.div
+                key="q"
+                initial={{ rotateY: -90, opacity: 0 }}
+                animate={{ rotateY: 0, opacity: 1 }}
+                exit={{ rotateY: 90, opacity: 0 }}
+                transition={{ duration: 0.8 }}
+                className="absolute inset-0 bg-emerald-800/40 border border-emerald-500 rounded-2xl flex items-center justify-center text-xl font-semibold shadow-2xl"
+              >
+                What is 2 + 2 ?
+              </motion.div>
+            )}
+
+            {step === 1 && (
+              <motion.div
+                key="opts"
+                initial={{ scale: 0.7, rotateX: -90, opacity: 0 }}
+                animate={{ scale: 1, rotateX: 0, opacity: 1 }}
+                exit={{ scale: 0.7, rotateX: 90, opacity: 0 }}
+                transition={{ duration: 0.8 }}
+                className="absolute inset-0 grid grid-cols-2 gap-3 p-4"
+              >
+                {["2", "3", "4", "5"].map((opt, i) => (
+                  <motion.div
+                    key={opt}
+                    whileHover={{ scale: 1.1, rotateY: 10 }}
+                    className="bg-emerald-700/50 border border-emerald-400 rounded-xl flex items-center justify-center text-lg shadow-lg cursor-pointer"
+                  >
+                    {opt}
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+
+            {step === 2 && (
+              <motion.div
+                key="sel"
+                initial={{ scale: 0.8, rotateY: -180, opacity: 0 }}
+                animate={{ scale: 1, rotateY: 0, opacity: 1 }}
+                exit={{ scale: 0.8, rotateY: 180, opacity: 0 }}
+                transition={{ duration: 0.8 }}
+                className="absolute inset-0 flex items-center justify-center text-2xl font-bold bg-emerald-900/60 border border-emerald-500 rounded-2xl shadow-xl"
+              >
+                Selected: 4
+              </motion.div>
+            )}
+
+            {step === 3 && (
+              <motion.div
+                key="res"
+                initial={{ rotateX: -90, opacity: 0 }}
+                animate={{ rotateX: 0, opacity: 1 }}
+                exit={{ rotateX: 90, opacity: 0 }}
+                transition={{ duration: 0.8 }}
+                className="absolute inset-0 flex items-center justify-center text-2xl font-bold bg-emerald-900/80 border border-emerald-600 rounded-2xl shadow-2xl"
+              >
+                ✅ Correct!
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  );
+}
 /* --------------------------------- FAQ ----------------------------------- */
 function FAQ() {
   const items = [
@@ -1105,6 +1203,7 @@ export default function LandingPage() {
       <Features />
       <CodePreview />
       <Showcase />
+      <QuizLanding/>
       <FAQ />
       <FinalCTA />
     </div>

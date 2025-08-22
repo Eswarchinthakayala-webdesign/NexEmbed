@@ -1,16 +1,17 @@
 // src/components/layout/Navbar.jsx
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Cpu } from "lucide-react";
+import { Menu, X, Cpu, Home, Computer, FolderKanban, Info, FileQuestionMark, LifeBuoy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 const navLinks = [
-  { name: "Home", path: "/" },
-  { name: "Simulator", path: "/simulator" },
-  { name: "Projects", path: "/projects" },
-  { name: "Details", path: "/details" },
-  { name: "Help", path: "/help" },
+  { name: "Home", path: "/",icon:<Home size={20}/> },
+  { name: "Simulator", path: "/simulator",icon:<Computer size={20}/> },
+  { name: "Projects", path: "/projects",icon:<FolderKanban size={20}/> },
+  { name: "Details", path: "/details",icon:<Info size={20}/> },
+  {name:"Quiz",path:"/quiz",icon:<FileQuestionMark size={20}/>},
+  { name: "Help", path: "/help",icon:<LifeBuoy size={20}/> },
 ];
 
 export default function Navbar() {
@@ -66,7 +67,7 @@ export default function Navbar() {
               >
                 {({ isActive }) => (
                   <motion.span whileHover={{ scale: 1.1 }} className="px-2 py-1">
-                    {link.name}
+                  {link.name}
                     {isActive && (
                       <motion.div
                         layoutId="nav-underline"
@@ -146,10 +147,10 @@ export default function Navbar() {
                   <NavLink
                     key={link.name}
                     to={link.path}
-                    className="text-lg font-medium text-gray-200 hover:text-emerald-400 transition-all hover:translate-x-2"
+                    className="text-lg font-medium flex gap-1 items-center border-b-1 hover:border-emerald-400 text-gray-200 hover:text-emerald-400 transition-all hover:translate-x-2"
                     onClick={() => setMobileOpen(false)}
                   >
-                    {link.name}
+                  {link.icon}{link.name}
                   </NavLink>
                 ))}
               </nav>
