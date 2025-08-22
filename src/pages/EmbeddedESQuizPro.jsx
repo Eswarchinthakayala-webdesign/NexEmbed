@@ -750,7 +750,7 @@ export default function EmbeddedQuizPro() {
                   <span className="sm:inline">History</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className=" w-[480px] bg-emerald-700/95 border-emerald-700/30">
+              <SheetContent side="right" className=" sm:w-[540px] w-[360px] bg-emerald-700/95 border-emerald-700/30">
                 <SheetHeader>
                   <SheetTitle className="text-emerald-100 flex items-center gap-2"><History className="h-4 w-4 text-emerald-400" /> Quiz History</SheetTitle>
                 </SheetHeader>
