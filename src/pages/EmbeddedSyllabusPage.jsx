@@ -1210,7 +1210,7 @@ export default function EmbeddedSyllabusPage() {
         {/* Layout */}
         <main
   className={cn(
-    "mx-auto max-w-7xl px-4 py-6 grid gap-6",
+    "mx-auto max-w-7xl w-full px-4 py-6 grid gap-6",
     zen ? "grid-cols-1" : "lg:grid-cols-12"
   )}
 >
