@@ -253,7 +253,8 @@ while (1) {
 },
   {
   id: "unit2",
-  title: "UNIT II — Embedded C Programming & Applications",
+  title: "UNIT II — Embedded C & applications
+    ",
   topics: [
     "Features of Embedded Programming Languages",
     "C vs Embedded C",
