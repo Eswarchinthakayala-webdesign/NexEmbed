@@ -8,6 +8,12 @@ import { motion } from "framer-motion";
 import * as THREE from "three";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism"; // stable theme
+import "highlight.js/lib/common";
+import "highlight.js/styles/atom-one-dark.css"; 
+import "highlight.js/styles/github.css";
+import { FaCheckDouble } from "react-icons/fa";
 import {
   Accordion,
   AccordionContent,
@@ -78,8 +84,12 @@ import {
   Bookmark,
   Play,
   Check,
+  RefreshCcw,
+  CheckCheck,
+  CircleDashed,
+  Hourglass,
 } from "lucide-react";
-
+import rehypeHighlight from "rehype-highlight";
 /* ============================================================
    Emerald Dark Theme Helpers
    ============================================================ */
@@ -104,225 +114,486 @@ function cn(...cls) {
    Course Content (Units + Markdown Notes)
    ============================================================ */
 const UNITS = [
-  {
-    id: "unit1",
-    title: "UNIT I — Embedded Computing",
-    topics: [
-      "Introduction",
-      "Complex Systems and Microprocessor",
-      "Embedded System Design Process",
-      "Formalisms for System Design",
-      "Design Examples",
-    ],
-    notes: `# UNIT I — Embedded Computing
+{
+  id: "unit1",
+  title: "UNIT I — Embedded Computing",
+  topics: [
+    "Introduction",
+    "Complex Systems and Microprocessor",
+    "Embedded System Design Process",
+    "Formalisms for System Design",
+    "Design Examples"
+  ],
+notes: `# UNIT I — Embedded Computing
 
 ## Introduction
-Embedded computing applies dedicated hardware and software to solve real-world tasks under constraints such as time, power, memory, cost, and safety.
+Embedded computing is a specialized branch of computer engineering that focuses on designing dedicated hardware and software systems for specific tasks. Unlike general-purpose computers, which are built for versatility, embedded systems are optimized to meet strict constraints. These constraints may relate to time, where the system must meet real-time deadlines; power, where efficiency and battery longevity are crucial; memory, where only limited RAM and ROM are available; cost, where the bill of materials must remain low for large-scale production; and reliability, where the system must maintain stable and safe operation even in harsh environments. The fundamental goals of embedded systems are predictability, ensuring deterministic behavior under timing constraints; efficiency, with designs optimized for performance while consuming minimal resources; reliability and safety, which ensure the system avoids catastrophic failures; and maintainability, where systems can be updated with new firmware or diagnostics in the field.
 
-**Goals:** determinism, reliability, efficiency, safety, maintainability.
+---
+
+### Historical Evolution
+The evolution of embedded computing has been shaped by technological advances over the decades. In the 1970s, the introduction of 4-bit and 8-bit microcontrollers such as the Intel 4004 and the 8051 laid the foundation for embedded applications. During the 1980s and 1990s, the industry transitioned to more powerful 16-bit and 32-bit microcontrollers, accompanied by the adoption of early real-time operating systems (RTOS) and applications in fields like automotive engine control units (ECUs). The 2000s marked the dominance of ARM Cortex-M devices and the widespread integration of system-on-chip (SoC) solutions, which enabled higher performance in smaller, more efficient packages. In the 2010s and 2020s, embedded computing further expanded with the rise of the Internet of Things (IoT), wearable devices, and the integration of artificial intelligence accelerators within embedded systems.
 
 ---
 
 ## Complex Systems and Microprocessor
-- **Complex systems** combine sensing, actuation, computation, and networking.
-- **Microprocessor vs. Microcontroller**
-  - *Microprocessor*: CPU-centric, typically needs external RAM/Flash/peripherals.
-  - *Microcontroller (MCU)*: SOC-like; CPU + RAM + Flash + peripherals on one chip.
-- **Metrics:** latency, throughput, jitter, WCET, energy/task, code size, MTTF.
+
+### Characteristics of Complex Embedded Systems
+Modern embedded systems are complex because they integrate sensing, actuation, computation, and communication in a tightly coordinated manner. They often involve heterogeneous hardware, combining microcontrollers, digital signal processors (DSPs), field-programmable gate arrays (FPGAs), and application-specific integrated circuits (ASICs) within a single design. These systems are frequently distributed, with multiple interconnected nodes communicating over buses such as CAN or networks like Ethernet and wireless protocols. Additionally, many applications demand strong safety and security guarantees, particularly in automotive, aerospace, and medical domains, which must comply with standards such as ISO 26262 or IEC 62304.
 
 ---
 
-## Embedded System Design Process
-1. Requirements (functional + non-functional)
-2. Specification (interfaces, timing, diagrams)
-3. Architecture (HW/SW partition, RTOS selection)
-4. Implementation (drivers, HAL/BSP, middleware, app logic)
-5. Verification (unit/integration/HIL, coverage, timing analysis)
-6. Deployment (OTA updates, diagnostics, logging)
+### Microprocessor vs. Microcontroller
+A microprocessor is primarily CPU-centric and relies on external components such as RAM, Flash memory, and peripherals to function. This makes it suitable for high-performance applications like laptops, servers, or systems that run full operating systems such as Linux or Windows. By contrast, a microcontroller integrates the CPU, memory, and peripherals into a single chip, offering a compact and cost-effective solution. Microcontrollers are widely used in consumer appliances, IoT devices, and automotive ECUs because of their low power consumption, affordability, and ability to run real-time operating systems or bare-metal applications.
 
-> **Tip:** Prototype early; validate timing on actual hardware.
+---
+
+### Metrics of Embedded Systems
+The performance and quality of an embedded system can be evaluated using a variety of metrics. Latency measures the time the system takes to respond to an event, while throughput quantifies the number of operations it can perform per unit of time. Jitter refers to the variability in timing, which must be minimized in real-time applications. Worst-case execution time (WCET) is critical for safety systems, ensuring deadlines are always met. Other metrics include energy per task, which reflects power efficiency; code size and memory footprint, which indicate resource usage; and mean time to failure (MTTF), which represents the system’s reliability and expected operational lifetime.
+
+---
+
+
+## Embedded System Design Process
+
+### Design Flow Stages
+The embedded system design process begins with requirements analysis, where engineers identify both functional goals, such as the tasks the system must perform, and non-functional constraints, such as timing, power, safety, and cost. These are followed by a detailed specification, which defines system interfaces, timing diagrams, and communication protocols. Architecture design comes next, involving decisions about partitioning tasks between hardware and software, selecting an RTOS, defining communication stacks, and addressing security. Once the architecture is established, the system is implemented through the development of low-level drivers, hardware abstraction layers, middleware, and application logic. Verification ensures the correctness of the system through unit testing, integration testing, timing analysis, and fault injection. Finally, deployment and maintenance involve field updates via over-the-air mechanisms, remote diagnostics, and applying cybersecurity patches to keep the system secure and reliable throughout its lifecycle.
+
+---
+
+### Tip
+Prototyping with development kits such as STM32 Nucleo or ESP32 boards allows rapid iteration and validation. Once the design stabilizes, engineers can transition to custom PCBs for production deployment.
 
 ---
 
 ## Formalisms for System Design
-- FSMs & Statecharts
-- Dataflow (SDF, KPN)
-- Petri Nets
-- UML/SysML: use-case, sequence, activity, component, deployment
-- Temporal logic specs (LTL/CTL)
 
-**Why use formal methods?** Predictability, analyzability, testability, and correctness-by-construction.
+### State-based Modeling
+State-based models, particularly finite state machines (FSMs), are widely used in embedded design to represent systems with discrete states and predictable transitions. Extensions such as statecharts add hierarchy and parallelism, making them well suited for modeling complex systems such as communication protocols or user interfaces.
+
+---
+
+### Dataflow Models
+Dataflow approaches represent computation as a network of operations connected by data streams. In synchronous dataflow (SDF), operations consume and produce data tokens at fixed rates, making it suitable for predictable applications such as digital filters. Kahn process networks (KPN) provide asynchronous communication between processes via FIFO channels, enabling efficient modeling of streaming applications like multimedia processing.
+
+---
+
+### Petri Nets
+Petri nets provide a graphical and mathematical framework for representing concurrent systems. They consist of places representing states and transitions representing events. Their ability to capture concurrency, synchronization, and resource sharing makes them highly useful in embedded applications that require parallel processing.
+
+---
+
+### UML/SysML
+Unified Modeling Language (UML) and Systems Modeling Language (SysML) offer a rich set of diagrams for system specification. Use-case diagrams capture functional requirements, sequence diagrams show message flows over time, activity diagrams illustrate workflows, and component diagrams represent system building blocks. Deployment diagrams further map software to hardware platforms, giving a complete architectural view.
+
+---
+
+### Temporal Logic
+Temporal logic frameworks such as Linear Temporal Logic (LTL) and Computation Tree Logic (CTL) allow formal specification of system properties. They are particularly useful for defining safety properties, such as ensuring that undesirable events never occur, and liveness properties, which guarantee that desired events eventually happen.
+
+---
+
+### Why Use Formalisms?
+By employing formal models, engineers gain predictability, analyzability, and testability, reducing ambiguity and making timing analysis easier. This approach often leads to correctness-by-construction, minimizing design flaws before implementation begins.
 
 ---
 
 ## Design Examples
-- **Thermostat:** sensor → control (PID) → PWM heater, safety interlocks.
-- **Wearable Pedometer:** IMU filter (FIR/IIR), peak detect, BLE sync, low-power modes.
-- **Smart Irrigation:** soil sensors, duty-cycled LoRa, solar harvesting, weather-aware scheduling.
-`,
-  },
-  {
-    id: "unit2",
-    title: "UNIT II — Embedded C Programming & Applications",
-    topics: [
-      "Features of Embedded Programming Languages",
-      "C vs Embedded C",
-      "Key Characteristics of Embedded C",
-      "Standard Embedded C Data Types",
-      "Block Diagram Explanation",
-      "Basic Programming Steps",
-      "Advanced Techniques",
-    ],
-    notes: `# UNIT II — Embedded C Programming & Applications
 
-## Features of Embedded Languages
-- Close to hardware, predictable memory model, tiny runtime.
-- Bitwise ops, fixed-point arithmetic, direct register access.
+### Example 1: Thermostat
+A thermostat system integrates a temperature sensor as input and uses a control algorithm such as PID to regulate a heating element. The outputs typically involve actuating a PWM-controlled heater and activating a safety relay. The system must operate with constraints such as maintaining ±1°C accuracy and incorporating fail-safe behavior if the sensor disconnects.
+
+---
+
+### Example 2: Wearable Pedometer
+A wearable pedometer processes signals from an IMU that includes accelerometers and gyroscopes. The system applies filters to remove noise and detects peaks corresponding to steps. The output is presented as a step count and synchronized with a smartphone using Bluetooth Low Energy. Key design constraints include ultra-low power operation to ensure long battery life.
+
+---
+
+### Example 3: Smart Irrigation System
+In a smart irrigation system, soil moisture sensors provide feedback, while weather forecast data may be integrated to optimize water usage. The system operates on low-power wireless networks such as LoRa, powered by solar energy. The actuators control water pumps to irrigate crops, and the system must operate reliably for years in remote field conditions.
+
+---
+
+### Example 4: Pacemaker (Medical Device)
+A pacemaker monitors ECG signals to detect arrhythmias and provides electrical stimulation to regulate heartbeats. Because it directly sustains human life, its design must prioritize absolute safety, redundancy, and adherence to rigorous medical certification processes such as FDA approval.
+
+---
+
+### Pseudo-code Example: Simple FSM for Traffic Light
+
+\`\`\`c
+enum State { RED, GREEN, YELLOW };
+State current = RED;
+
+while (1) {
+  switch (current) {
+    case RED:
+      turnOn(RED_LED);
+      wait(5000);
+      current = GREEN;
+      break;
+    case GREEN:
+      turnOn(GREEN_LED);
+      wait(3000);
+      current = YELLOW;
+      break;
+    case YELLOW:
+      turnOn(YELLOW_LED);
+      wait(2000);
+      current = RED;
+      break;
+  }
+}
+\`\`\`
+
+---
+`
+
+},
+  {
+  id: "unit2",
+  title: "UNIT II — Embedded C Programming & Applications",
+  topics: [
+    "Features of Embedded Programming Languages",
+    "C vs Embedded C",
+    "Key Characteristics of Embedded C",
+    "Standard Embedded C Data Types",
+    "Block Diagram Explanation",
+    "Basic Programming Steps",
+    "Advanced Techniques"
+  ],
+  notes: `# UNIT II — Embedded C Programming & Applications
+
+## Features of Embedded Programming Languages
+Embedded C programming languages are tailored to directly interact with hardware while maintaining predictable and efficient execution. Unlike general-purpose languages, embedded languages focus on **low-level control of microcontrollers and processors**, ensuring reliable timing and resource usage. They provide constructs for **bitwise operations, fixed-point arithmetic, and direct register access**, which are crucial for controlling peripherals and optimizing memory. Furthermore, embedded C has a **small runtime footprint** and avoids unnecessary abstraction layers, making it highly suitable for devices with limited memory and processing power.
+
+---
 
 ## C vs. Embedded C
-- **Hosted C** assumes OS + stdlib; **Embedded C** is freestanding (no OS), limited stdlib.
-- Vendor headers expose memory-mapped registers (e.g., CMSIS on ARM).
+Although Embedded C is derived from standard C, it diverges in design philosophy and execution environment. **Standard (hosted) C** typically assumes the presence of an operating system and full support for the C standard library, whereas **Embedded C** is considered a freestanding implementation, meaning it runs without an OS and often with restricted library support. Instead, embedded compilers provide **vendor-specific header files** that expose hardware features such as memory-mapped registers, timers, and interrupt controllers. For example, ARM-based microcontrollers use the **CMSIS (Cortex Microcontroller Software Interface Standard)** to define consistent register-level access. This enables developers to write portable yet hardware-aware programs.
 
-## Key Characteristics
-- Deterministic timing; minimize dynamic allocation; use \`volatile\` for I/O registers.
-- ISRs: short, defer work to tasks.
+---
 
-## Standard Types
-- \`stdint.h\` fixed widths: \`uint8_t\`, \`int16_t\`, etc. Portability & clarity.
+## Key Characteristics of Embedded C
+Embedded C emphasizes **deterministic execution** and minimal overhead. Programs are designed to meet real-time deadlines, so developers must carefully avoid practices like unbounded loops, heavy recursion, or dynamic memory allocation. A key feature of Embedded C is the use of the **volatile keyword**, which prevents the compiler from optimizing out hardware register reads and writes, ensuring correctness in I/O operations. Additionally, **interrupt service routines (ISRs)** must be kept short to reduce latency, with most processing deferred to background tasks or state machines. These design rules ensure reliability in systems where even microseconds of delay can lead to failures.
+
+---
+
+## Standard Embedded C Data Types
+Portability is essential in embedded software, as applications often migrate across different microcontrollers. To maintain consistency, developers rely on **fixed-width data types** provided in the \`<stdint.h>\` header file, such as \`uint8_t\`, \`int16_t\`, and \`uint32_t\`. These ensure predictable memory sizes regardless of the platform. For example, a sensor driver written with \`uint16_t\` will behave consistently on both an 8-bit AVR and a 32-bit ARM Cortex-M microcontroller. This clarity reduces debugging time and improves code reliability across architectures.
+
+---
 
 ## Toolchain Block Diagram
-**Source** → Preprocess → Compile → Assemble → Link/Locate → **HEX/ELF** → Flash → **Run**
+The development of embedded C programs follows a structured compilation toolchain:
 
-## Basic Steps
-1. Clock & peripheral init.
-2. Drivers (GPIO/UART/I2C/SPI).
-3. Application FSM/statecharts.
-4. On-target debug, unit tests.
+**Source Code (.c/.h)** → **Preprocessing** → **Compilation** → **Assembly** → **Linking/Locating** → **Executable (HEX/ELF)** → **Flashing to MCU** → **Execution on Target**
+
+This toolchain transforms high-level C code into machine instructions suitable for a specific microcontroller. The resulting **.hex or .elf files** are loaded into flash memory using programmers or debuggers (e.g., JTAG, SWD). Once flashed, the program executes directly on the target hardware.
+
+---
+
+## Basic Programming Steps
+Writing an embedded application typically begins with **initialization of the system clock and peripherals**. Next, **low-level drivers** are developed to control GPIO, UART, I2C, SPI, or ADC/DAC interfaces. The core application logic often follows a **finite state machine (FSM) or statechart model**, ensuring predictable and maintainable control flow. After implementation, the system undergoes **on-target debugging and unit testing**, where breakpoints, logic analyzers, or oscilloscopes validate the software’s interaction with real hardware. These iterative steps allow developers to refine performance, power usage, and reliability.
+
+---
 
 ## Advanced Techniques
-- DMA pipelines, ring buffers, double buffering.
-- Low-power (sleep modes, clock gating).
-- MISRA-C, static analysis, coverage.
-`,
-  },
-  {
-    id: "unit3",
-    title: "UNIT III — Introduction to RTOS",
-    topics: [
-      "Principles",
-      "Semaphores and Queues",
-      "Task and Task States",
-      "Tasks/Data & Shared Data",
-      "Message Queues, Mailboxes, Pipes",
-      "Timer Functions, Events, Memory Management",
-      "Interrupts in an RTOS",
-      "Real-time Periodicity & Scheduling (RMS, EDF)",
-      "Resource Sharing & Priority Inheritance",
-    ],
-    notes: `# UNIT III — Introduction to RTOS
+To meet the growing complexity of modern embedded systems, advanced programming techniques are widely used. **DMA (Direct Memory Access)** pipelines, circular buffers, and double buffering schemes reduce CPU load and enable efficient data transfer. Power optimization strategies, such as **sleep modes, clock gating, and dynamic voltage scaling**, extend battery life in IoT and wearable devices. Code quality is enforced through **MISRA-C guidelines, static analysis tools, and code coverage metrics**, ensuring long-term safety and maintainability. These practices are especially critical in safety-critical industries such as automotive, aerospace, and medical devices.
 
-## Principles
-- Preemptive, priority-based scheduling.
-- Bounded latency system calls; determinism.
-- IPC primitives: queues, semaphores, events.
+---`
+}
+,{
+  id: "unit3",
+  title: "UNIT III — Introduction to RTOS",
+  topics: [
+    "Principles",
+    "Semaphores and Queues",
+    "Task and Task States",
+    "Tasks/Data & Shared Data",
+    "Message Queues, Mailboxes, Pipes",
+    "Timer Functions, Events, Memory Management",
+    "Interrupts in an RTOS",
+    "Real-time Periodicity & Scheduling (RMS, EDF)",
+    "Resource Sharing & Priority Inheritance"
+  ],
+  notes: `# UNIT III — Introduction to RTOS
 
-## Tasks & States
-- States: Ready, Running, Blocked, Suspended.
-- Context switches controlled by scheduler and events.
+## Principles of RTOS
+A **Real-Time Operating System (RTOS)** provides deterministic and predictable task execution, making it essential for embedded systems where timing is critical. Its principles include:
+- **Preemptive, priority-based scheduling**: High-priority tasks can interrupt lower-priority ones, ensuring deadlines are met.  
+- **Bounded latency system calls**: Kernel functions execute within known time limits, enabling deterministic behavior.  
+- **Inter-process communication (IPC) mechanisms**: Semaphores, message queues, and events provide safe communication between tasks without data corruption.  
 
-## Semaphores & Queues
-- Binary/Counting semaphores for signaling & resource counts.
-- Queues for message passing; avoid shared-memory races.
+The key distinction between an RTOS and a general-purpose OS is **determinism**—not throughput.
 
-## Message Queues, Mailboxes, Pipes
-- Mailboxes (single-slot), pipes (byte streams), queues (fixed-size items).
+---
 
-## Timer Functions, Events, Memory
-- Tick/tickless kernels; event groups; fixed-block memory pools for O(1) alloc.
+## Tasks and Task States
+In RTOS, applications are divided into **tasks** (lightweight threads). Each task has its own **stack, priority, and control block**. A task can exist in multiple states:
+- **Ready**: Waiting to be scheduled.  
+- **Running**: Actively executing on the CPU.  
+- **Blocked**: Waiting for an event, semaphore, or resource.  
+- **Suspended**: Manually paused, not eligible for scheduling.  
 
-## Interrupts in RTOS
-- Keep ISRs short; defer work to task context; avoid blocking in ISR.
+The **scheduler** determines task execution based on priority and system events, with **context switching** enabling multitasking.
 
-## Scheduling (RMS, EDF)
-- **RMS**: fixed priorities, shorter period → higher priority.
-- Utilization bound U = n(2^(1/n) - 1) for n tasks (sufficient condition).
-- **EDF**: earliest deadline first; optimal on uniprocessors.
+---
 
-## Resource Sharing & Priority Inheritance
-- Protocols: PIP, PCP, SRP; avoid deadlocks via ordering/timeouts.
-`,
-  },
-  {
-    id: "unit4",
-    title: "UNIT IV — Basic Hardware–Software Co-Design",
-    topics: [
-      "Saving Memory and Power",
-      "Example RTOS: µC/OS",
-      "Dev Tools: Host/Target, Linker/Locator",
-      "HW–SW Co-simulation & Partitioning",
-      "Optimization: ILP, Kernighan–Lin, GA, PSO",
-      "Power-aware & Functional Partitioning",
-    ],
-    notes: `# UNIT IV — Hardware–Software Co-Design
+## Semaphores and Queues
+- **Semaphores**:  
+  - **Binary semaphore** acts as a signal (lock/unlock).  
+  - **Counting semaphore** tracks the availability of multiple identical resources.  
+- **Queues**: Provide a **FIFO mechanism** for message passing between tasks, avoiding race conditions in shared memory.  
 
-## Saving Memory/Power
-- Prefer compact types; compress assets; avoid recursion.
-- DVFS, deep sleep, peripheral gating, batching I/O.
+Semaphores prevent **race conditions**, while queues improve modularity by decoupling producer and consumer tasks.
+
+---
+
+## Message Queues, Mailboxes, and Pipes
+- **Message Queues**: Store multiple fixed-size messages, suitable for asynchronous task communication.  
+- **Mailboxes**: Store a **single message slot** (overwrites old messages when new arrives).  
+- **Pipes**: Stream-oriented communication, enabling **byte or character streams** between tasks.  
+
+Choosing the right IPC mechanism depends on **data size, frequency, and synchronization needs**.
+
+---
+
+## Timer Functions, Events, and Memory Management
+RTOS kernels use **timer services** to support periodic tasks:  
+- **Tick-based kernel**: Regular system tick interrupts drive scheduling.  
+- **Tickless kernel**: Saves power by waking only when required.  
+- **Event Groups**: Allow multiple tasks to wait on specific events (bitmask-based signaling).  
+- **Memory Management**: Instead of malloc/free, RTOS often uses **fixed-size memory pools**, ensuring O(1) allocation and avoiding fragmentation.
+
+---
+
+## Interrupts in an RTOS
+Interrupt Service Routines (ISRs) are crucial in real-time systems, but they must be kept minimal:
+- Perform only **essential operations** inside ISRs.  
+- Defer heavy work to **tasks** using semaphores or queues.  
+- Avoid blocking calls and long execution inside ISRs to maintain **low interrupt latency**.  
+
+---
+
+## Real-Time Scheduling (RMS & EDF)
+Two widely used scheduling algorithms:  
+
+- **Rate Monotonic Scheduling (RMS):**  
+  - Assigns **higher priority to tasks with shorter periods**.  
+  - Works best for **periodic, independent tasks**.  
+  - Utilization bound:  
+    \`U = n (2^(1/n) - 1)\`  
+    where *n* is the number of tasks. If total CPU utilization ≤ U, deadlines are guaranteed.  
+
+- **Earliest Deadline First (EDF):**  
+  - Dynamically assigns priority to tasks with **closest deadlines**.  
+  - More efficient than RMS; optimal for **uniprocessor scheduling**.  
+  - Handles higher CPU utilizations but requires **dynamic priority management**.  
+
+---
+
+## Resource Sharing and Priority Inheritance
+When multiple tasks share resources (e.g., UART, sensors), improper handling can lead to **deadlocks** or **priority inversion** (low-priority task blocking a high-priority task).  
+Solutions include:  
+- **Priority Inheritance Protocol (PIP):** Temporarily boosts the priority of a low-priority task holding a resource.  
+- **Priority Ceiling Protocol (PCP):** Assigns each resource a maximum priority level to prevent deadlock.  
+- **Stack Resource Policy (SRP):** Ensures tasks only start when all resources they need are available.  
+
+These protocols ensure predictable execution and fairness in resource usage.
+
+---`
+}
+,
+{
+  id: "unit4",
+  title: "UNIT IV — Hardware–Software Co-Design",
+  topics: [
+    "Memory & Power Optimization",
+    "Example RTOS: µC/OS",
+    "Development Tools: Host/Target, Linker/Locator",
+    "HW–SW Co-Simulation & Partitioning",
+    "Optimization Techniques: ILP, Kernighan–Lin, GA, PSO",
+    "Power-Aware & Functional Partitioning",
+  ],
+  notes: `# UNIT IV — Hardware–Software Co-Design
+
+## Memory & Power Optimization
+- **Memory Efficiency**: 
+  - Use fixed-size arrays, avoid fragmentation from dynamic memory.
+  - Compact data types (\`uint8_t\` vs \`int\`), lookup tables instead of recomputation.
+  - Code compression & link-time optimization (LTO).
+- **Power Efficiency**:
+  - Dynamic Voltage & Frequency Scaling (DVFS).
+  - Peripheral clock gating, sleep/standby modes.
+  - Sensor batching and event-driven I/O instead of polling.
 
 ## Example RTOS: µC/OS
-- Tiny footprint, preemptive priority scheduling, semaphores/mailboxes.
+- **µC/OS-II/III**:
+  - Portable, preemptive, priority-based kernel.
+  - Rich IPC: semaphores, mailboxes, queues.
+  - Deterministic scheduling suitable for safety-critical systems.
+- Widely used in automotive, avionics (DO-178B certifiable).
 
-## Dev Tools
-- Host (IDE/Compiler/Emulator) <-> Target (board, probe).
-- Linker scripts/locators define memory regions & sections.
+## Development Tools
+- **Host Side**: IDE, compiler, emulator/simulator, debugging utilities.
+- **Target Side**: Embedded board, JTAG/SWD probe, on-chip debugger.
+- **Linker/Locator**:
+  - Memory maps (Flash, SRAM, peripherals).
+  - Section placement (\`.text\`, \`.data\`, \`.bss\`, stacks/heap).
+  - Overlaying unused memory regions for tighter fits.
 
-## Co-Sim & Partitioning
-- Transaction-level models; accelerate hotspots in FPGA/ASIC; control on MCU.
+## HW–SW Co-Simulation & Partitioning
+- **Co-Simulation**:
+  - Transaction-Level Modeling (TLM) in SystemC.
+  - FPGA-in-the-loop to validate acceleration blocks.
+- **Partitioning**:
+  - HW for compute-intensive, parallel tasks (DSP/accelerator).
+  - SW for flexibility, control logic, OS services.
+  - Balance performance, power, cost.
 
-## Optimization Methods
-- **ILP** (exact), **Kernighan–Lin** (graph partition heuristic),
-- **GA** (evolutionary search), **PSO** (swarm-based).
+## Optimization Techniques
+- **ILP (Integer Linear Programming)**: exact mathematical formulation, optimal but NP-hard.
+- **Kernighan–Lin**: heuristic for graph-based partitioning (fast, scalable).
+- **Genetic Algorithms (GA)**: evolutionary meta-heuristic, explores large design spaces.
+- **Particle Swarm Optimization (PSO)**: swarm intelligence, converges quickly for HW–SW trade-offs.
 
-## Power-aware & Functional Partitioning
-- Minimize toggling; maximize locality; schedule sleep windows.
-`,
-  },
+## Power-Aware & Functional Partitioning
+- **Power-Aware**:
+  - Clock gating & power domains, DVFS policies.
+  - Minimize switching activity in logic blocks.
+- **Functional Partitioning**:
+  - Group related tasks into clusters (cache-locality, bus optimization).
+  - Schedule tasks to align with idle/sleep windows.
+  - Balance latency vs. throughput depending on application domain.
+`
+}
+,
   {
-    id: "unit5",
-    title: "UNIT V — Advanced Architectures",
-    topics: [
-      "ARM & ARM7 (LPC2148)",
-      "Networked Systems: I2C, CAN, RS232, USB, IrDA, Bluetooth",
-      "DSPs, FPGAs, ASICs",
-      "SoC Architecture & On-Chip Interconnect",
-      "SoC Case Study: Digital Camera",
-    ],
-    notes: `# UNIT V — Advanced Architectures
+  id: "unit5",
+  title: "UNIT V — Advanced Architectures",
+  topics: [
+    "ARM & ARM7 (LPC2148)",
+    "Networked Systems: I2C, CAN, RS232, USB, IrDA, Bluetooth",
+    "DSPs, FPGAs, ASICs",
+    "SoC Architecture & On-Chip Interconnect",
+    "SoC Case Study: Digital Camera"
+  ],
+  notes: `# UNIT V — Advanced Architectures
 
 ## ARM & ARM7 (LPC2148)
-- ARM7TDMI, Thumb ISA, vector interrupts, PLL, timers, UART, I2C, SPI, ADC, PWM.
+The ARM7TDMI is a widely used RISC processor core with the following features:
+- **ARM & Thumb ISA**: Supports both 32-bit ARM and 16-bit Thumb instructions for efficiency.  
+- **LPC2148 Microcontroller**: Based on ARM7TDMI-S core, clocked with a **PLL** up to 60 MHz.  
+- **Peripherals**: Timers, UART, I2C, SPI, ADC, DAC, PWM, and watchdog timers.  
+- **Interrupt System**: Vectored Interrupt Controller (VIC) allows prioritization of interrupts.  
+- **Low Power**: Idle and power-down modes suitable for embedded applications.  
+
+Applications: industrial control, motor drivers, IoT gateways, and portable devices.  
+
+---
 
 ## Buses & Connectivity
-- **I2C**: two-wire, addresses, 100 kHz–3.4 MHz.
-- **CAN**: robust arbitration, CRC, automotive dominant.
-- **RS232**: legacy serial ± voltage, point-to-point.
-- **USB**: host-centric, endpoints, transfer types.
-- **IrDA**: infrared, line-of-sight.
-- **Bluetooth**: 2.4 GHz, Classic + BLE (GATT profiles).
 
-## DSPs, FPGAs, ASICs
-- DSPs: MAC units, circular buffers, saturation arithmetic.
-- FPGAs: reconfigurable logic, IP cores, HLS.
-- ASICs: fixed function, high perf/efficiency at volume.
+### I²C (Inter-Integrated Circuit)
+- **Two-wire bus**: SDA (data), SCL (clock).  
+- Supports **multi-master, multi-slave** communication.  
+- Speed grades: **Standard (100 kHz), Fast (400 kHz), Fast+ (1 MHz), High-speed (3.4 MHz)**.  
+- Applications: EEPROM, sensors, RTC modules.  
 
-## SoC & Interconnect
-- AXI/AHB/APB, cache coherence, DMA, QoS, on-chip networks.
+### CAN (Controller Area Network)
+- Robust, differential signaling protocol.  
+- **Arbitration** via dominant/recessive bits, ensures priority without data loss.  
+- Features: CRC error detection, automatic retransmission.  
+- Common in **automotive, avionics, industrial automation**.  
+
+### RS-232
+- Legacy point-to-point serial communication.  
+- Voltage levels: **+3V to +15V (logic 0)**, **-3V to -15V (logic 1)**.  
+- Low cost but limited to short distances and low data rates.  
+
+### USB (Universal Serial Bus)
+- **Host-centric** protocol with device enumeration.  
+- Communication via **endpoints**.  
+- Transfer types: Control, Bulk, Isochronous, Interrupt.  
+- Applications: keyboards, storage, cameras, mobile devices.  
+
+### IrDA (Infrared Data Association)
+- Short-range, **line-of-sight** wireless protocol.  
+- Speeds up to 16 Mbps.  
+- Historically used in PDAs, printers, laptops.  
+
+### Bluetooth
+- 2.4 GHz wireless protocol.  
+- Modes: **Bluetooth Classic** (streaming, audio) and **BLE** (low-energy IoT).  
+- Uses **profiles** (e.g., GATT, A2DP) for interoperability.  
+- Applications: wearables, medical devices, IoT sensors.  
+
+---
+
+## DSPs, FPGAs, and ASICs
+
+### Digital Signal Processors (DSPs)
+- Specialized for **real-time signal processing**.  
+- Features:  
+  - **MAC (Multiply–Accumulate) units** for high-speed arithmetic.  
+  - **Circular buffers** for continuous data streams.  
+  - **Saturation arithmetic** prevents overflow errors.  
+- Applications: audio processing, image enhancement, communication systems.  
+
+### FPGAs (Field-Programmable Gate Arrays)
+- Reconfigurable hardware with logic blocks and interconnects.  
+- Supports **parallelism**, making them ideal for high-speed applications.  
+- Include **IP cores, DSP blocks, and high-level synthesis (HLS)** tools.  
+- Applications: prototyping, aerospace, AI accelerators.  
+
+### ASICs (Application-Specific Integrated Circuits)
+- Custom hardware designed for a dedicated function.  
+- Benefits: high performance, lower power consumption, reduced size.  
+- Drawbacks: **non-reconfigurable** and high upfront design cost.  
+- Applications: smartphones, GPUs, networking chips.  
+
+---
+
+## SoC Architecture & On-Chip Interconnect
+A **System-on-Chip (SoC)** integrates CPU, memory, peripherals, and accelerators on a single chip.  
+Key interconnect standards:
+- **AXI (Advanced eXtensible Interface):** High-performance, supports burst transfers, pipelining, and QoS.  
+- **AHB (Advanced High-performance Bus):** High-speed communication for system-level transfers.  
+- **APB (Advanced Peripheral Bus):** Low-power, simple interface for peripherals.  
+- **DMA (Direct Memory Access):** Enables high-speed data movement without CPU intervention.  
+- **Cache Coherency Mechanisms:** Ensure consistent data across multiple processors/cores.  
+- **Network-on-Chip (NoC):** Scalable interconnect fabric for modern multicore SoCs.  
+
+---
 
 ## Case Study: Digital Camera SoC
-Sensor → ISP (demosaic/denoise) → JPEG/HEVC → Memory → Display/Storage.
-Constraints: frame deadlines, power, heat, bandwidth.
-`,
-  },
+
+### Data Flow
+\`\`\`
+Image Sensor → ISP (Image Signal Processor) → Compression (JPEG/HEVC) 
+            → Memory Controller → Display/Storage
+\`\`\`
+
+### Processing Stages
+- **Image Sensor**: Captures raw pixel data (Bayer pattern).  
+- **ISP**: Performs **demosaicing, denoising, white balance, and sharpening**.  
+- **Compression Engine**: Converts to JPEG/HEVC for efficient storage.  
+- **Memory Subsystem**: High bandwidth required for multiple frames.  
+- **Display/Storage Interface**: Transfers processed images to LCD or SD card.  
+
+### Design Constraints
+- **Real-time deadlines**: Must process frames within 33 ms (30 fps).  
+- **Power efficiency**: Limited battery in portable cameras.  
+- **Thermal management**: Heat dissipation due to high computation.  
+- **Bandwidth requirements**: Multiple image pipelines accessing memory simultaneously.  
+
+This case study demonstrates the **integration of DSP, memory systems, and communication buses** in an SoC for real-world embedded applications.
+
+---`
+}
+,
 ];
 
 /* ============================================================
@@ -586,13 +857,13 @@ function StudyTimer() {
       </div>
       <div className="flex gap-2">
         <Button
-          className="flex-1 bg-emerald-700 hover:bg-emerald-600"
+          className="flex-1 bg-emerald-700 cursor-pointer hover:bg-emerald-600"
           onClick={() => setRunning((v) => !v)}
         >
           {running ? <Pause className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
           {running ? "Pause" : "Start"}
         </Button>
-        <Button variant="outline" className={emerald.border} onClick={() => setSecs(25 * 60)}>
+        <Button variant="outline" className={emerald.border,"cursor-pointer"} onClick={() => setSecs(25 * 60)}>
           Reset
         </Button>
       </div>
@@ -695,7 +966,7 @@ function Quiz({ unit }) {
   return (
     <div className="space-y-4">
       {questions.map((q) => (
-        <Card key={q.id} className={cn(emerald.panel, emerald.border)}>
+        <Card key={q.id} className={cn("bg-black/50",emerald.border)}>
           <CardHeader className="pb-2">
             <CardTitle className="text-emerald-100 text-base">{q.prompt}</CardTitle>
             <CardDescription className="text-emerald-300">Question ID: {q.id}</CardDescription>
@@ -710,8 +981,13 @@ function Quiz({ unit }) {
                       onCheckedChange={() =>
                         setState((prev) => ({ ...prev, [q.id]: i }))
                       }
+                      className={cn(
+                        "data-[state=checked]:bg-emerald-600 cursor-pointer data-[state=checked]:border-emerald-600",
+                        "data-[state=checked]:text-white border-emerald-400"
+                      )}
                     />
-                    <span>{o}</span>
+
+                    <span className="text-white">{o}</span>
                   </label>
                 ))}
               </div>
@@ -720,14 +996,14 @@ function Quiz({ unit }) {
               <div className="flex gap-3">
                 <Button
                   variant={state[q.id] === "true" ? "default" : "outline"}
-                  className={cn(state[q.id] === "true" ? "bg-emerald-700" : "", emerald.border)}
+                  className={cn("bg-emerald-400 cursor-pointer hover:bg-emerald-500",state[q.id] === "true" ? "bg-emerald-700" : "", emerald.border)}
                   onClick={() => setState((p) => ({ ...p, [q.id]: "true" }))}
                 >
                   True
                 </Button>
                 <Button
                   variant={state[q.id] === "false" ? "default" : "outline"}
-                  className={cn(state[q.id] === "false" ? "bg-emerald-700" : "", emerald.border)}
+                  className={cn("bg-emerald-400 cursor-pointer hover:bg-emerald-500",state[q.id] === "false" ? "bg-emerald-700" : "", emerald.border)}
                   onClick={() => setState((p) => ({ ...p, [q.id]: "false" }))}
                 >
                   False
@@ -747,7 +1023,7 @@ function Quiz({ unit }) {
       ))}
       <div className="flex items-center gap-3">
         <Button
-          className="bg-emerald-700 hover:bg-emerald-600"
+          className="bg-emerald-700 cursor-pointer hover:bg-emerald-600"
           onClick={() => {
             setSubmitted(true);
             toast.success("Quiz submitted!");
@@ -790,18 +1066,28 @@ function TaskList({ unitId }) {
           <Button
             size="sm"
             variant="outline"
-            className={emerald.border}
+            className={emerald.border,"cursor-pointer"}
             onClick={() => setTasks(tasks.map((t) => ({ ...t, done: true })))}
           >
-            Mark all done
+           <Tooltip>
+          <TooltipTrigger><CheckCheck/> </TooltipTrigger>
+          <TooltipContent>
+            <p>Mark All</p>
+          </TooltipContent>
+        </Tooltip>
           </Button>
           <Button
             size="sm"
             variant="outline"
-            className={emerald.border}
+            className={emerald.border,"cursor-pointer"}
             onClick={() => setTasks(tasks.map((t) => ({ ...t, done: false })))}
           >
-            Reset
+           <Tooltip>
+          <TooltipTrigger><RefreshCcw/> </TooltipTrigger>
+          <TooltipContent>
+            <p>Refresh</p>
+          </TooltipContent>
+        </Tooltip>
           </Button>
         </div>
       </div>
@@ -809,12 +1095,19 @@ function TaskList({ unitId }) {
       <div className="space-y-2">
         {tasks.map((t) => (
           <div key={t.id} className="flex items-center gap-2">
-            <Checkbox
+           <Checkbox
               checked={t.done}
               onCheckedChange={(v) =>
                 setTasks(tasks.map((x) => (x.id === t.id ? { ...x, done: !!v } : x)))
               }
+              className={cn(
+                "transition-colors duration-200",
+                "border-emerald-400 cursor-pointer hover:border-emerald-500",
+                "data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600",
+                "data-[state=checked]:text-white"
+              )}
             />
+
             <Input
               value={t.text}
               onChange={(e) =>
@@ -825,7 +1118,7 @@ function TaskList({ unitId }) {
             <Button
               size="icon"
               variant="ghost"
-              className="text-emerald-300 hover:text-emerald-100"
+              className="text-red-300 cursor-pointer hover:bg-red-500 hover:text-black"
               onClick={() => setTasks(tasks.filter((x) => x.id !== t.id))}
             >
               <Trash2 className="h-4 w-4" />
@@ -847,7 +1140,7 @@ function TaskList({ unitId }) {
             setTasks([...tasks, { id, text: newText.trim(), done: false }]);
             setNewText("");
           }}
-          className="bg-emerald-700 hover:bg-emerald-600"
+          className="bg-emerald-700 cursor-pointer hover:bg-emerald-600"
         >
           Add
         </Button>
@@ -1084,7 +1377,7 @@ export default function EmbeddedSyllabusPage() {
             variant="outline"
             className={cn(
               emerald.border,
-              "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900"
+              "bg-emerald-950/60 cursor-pointer text-emerald-100 hover:bg-emerald-400"
             )}
             size="sm"
           >
@@ -1096,7 +1389,7 @@ export default function EmbeddedSyllabusPage() {
           className={cn(
             emerald.panel,
             emerald.border,
-            "w-72 sm:w-80 text-emerald-50 p-2"
+            "w-72 sm:w-80 text-emerald-50 m-2 p-2"
           )}
         >
           <DropdownMenuLabel>Display</DropdownMenuLabel>
@@ -1192,7 +1485,7 @@ export default function EmbeddedSyllabusPage() {
             variant="outline"
             className={cn(
               emerald.border,
-              "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900"
+              "bg-emerald-950/60 cursor-pointer text-emerald-100 hover:bg-emerald-400"
             )}
             onClick={() => window.print()}
             size="sm"
@@ -1272,17 +1565,17 @@ export default function EmbeddedSyllabusPage() {
                 )}
               >
                 <AccordionTrigger className="hover:no-underline">
-                  <div className="flex items-center gap-2 w-full">
+                  <div className="flex items-center gap-2 w-full p-2">
                     <Badge className="bg-emerald-700/70 border-emerald-600/50">
                       {u.id.toUpperCase()}
                     </Badge>
-                    <span className="text-left flex-1">{u.title}</span>
+                    <span className="text-left flex-1 text-gray-300">{u.title}</span>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="text-emerald-300 hover:text-emerald-100"
+                          className="text-emerald-300 cursor-pointer hover:bg-emerald-400 hover:text-black"
                           onClick={(e) => {
                             e.stopPropagation();
                             toggleBookmark(u.id);
@@ -1304,22 +1597,21 @@ export default function EmbeddedSyllabusPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="text-emerald-300 hover:text-emerald-100"
+                          className="text-emerald-300 bg-emerald-400/50 cursor-pointer hover:text-emerald-400 hover:bg-emerald-500/50"
                           onClick={(e) => {
                             e.stopPropagation();
                             markComplete(u.id, !done);
                           }}
                         >
-                          <Check
+                          {done ?<Hourglass/>:<Check
                             className={cn(
-                              "h-4 w-4",
-                              done ? "text-emerald-400" : ""
+                              "h-4 w-4 text-emerald-400"
                             )}
-                          />
+                          />}
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        {done ? "Mark incomplete" : "Mark complete"}
+                        {done ? "pending" : "completed"}
                       </TooltipContent>
                     </Tooltip>
                   </div>
@@ -1329,29 +1621,30 @@ export default function EmbeddedSyllabusPage() {
                     <ul className="space-y-1">
                       {u.topics.map((t, idx) => (
                         <li key={idx}>
-                          <Button
+                         <Button
                             variant="ghost"
                             size="sm"
-                            className="w-full justify-start text-emerald-200 hover:text-emerald-50"
+                            className="justify-start cursor-pointer text-emerald-200 hover:text-emerald-700 w-full text-left overflow-hidden text-ellipsis whitespace-nowrap"
                             onClick={() => {
-                              setSelectedTopic((cur) =>
-                                cur === t ? null : t
-                              );
+                              setSelectedTopic((cur) => (cur === t ? null : t));
                               setTopicEditing(false);
                             }}
                           >
-                            <ChevronRight className="h-4 w-4 mr-2" />
-                            {t}
+                            <ChevronRight className="h-4 w-4 mr-2 flex-shrink-0" />
+                            <span className="text-wrap">{t}</span>
                           </Button>
 
+
+                         
                           {/* Inline responsive container */}
                           {selectedTopic === t && openUnit === u.id && (
-                            <div className="mt-2 w-full rounded-xl border border-emerald-800/60 bg-emerald-950/40 p-3">
-                              <div className="flex items-center justify-between flex-wrap gap-2">
-                                <h4 className="text-emerald-100 font-semibold">
+                            <div className="mt-2 w-full rounded-xl border border-emerald-800/60 bg-black p-3">
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <h4 className="text-emerald-500 font-semibold">
                                   {t}
+
                                 </h4>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-shrink-0">
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <Button
@@ -1364,9 +1657,7 @@ export default function EmbeddedSyllabusPage() {
                                         <BookOpen className="h-4 w-4" />
                                       </Button>
                                     </TooltipTrigger>
-                                    <TooltipContent>
-                                      View (Markdown Preview)
-                                    </TooltipContent>
+                                    <TooltipContent>View (Markdown Preview)</TooltipContent>
                                   </Tooltip>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
@@ -1380,34 +1671,92 @@ export default function EmbeddedSyllabusPage() {
                                         <Code2 className="h-4 w-4" />
                                       </Button>
                                     </TooltipTrigger>
-                                    <TooltipContent>
-                                      Editor (Markdown)
-                                    </TooltipContent>
+                                    <TooltipContent>Editor (Markdown)</TooltipContent>
                                   </Tooltip>
                                 </div>
                               </div>
 
                               {!topicEditing ? (
-                                <div className="prose prose-invert max-w-none text-sm mt-3 break-words whitespace-pre-wrap">
-                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                    {activeTopicNotes}
-                                  </ReactMarkdown>
-                                </div>
+                                                    <div className="w-full text-sm mt-3  break-words whitespace-pre-wrap">
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                h1: ({node, ...props}) => (
+                                  <h1 className="text-emerald-300 text-xl font-bold mt-4 mb-2" {...props} />
+                                ),
+                                h2: ({node, ...props}) => (
+                                  <h2 className="text-emerald-300 text-lg font-semibold mt-3 mb-2" {...props} />
+                                ),
+                                h3: ({node, ...props}) => (
+                                  <h3 className="text-emerald-300 text-base font-semibold mt-2 mb-1" {...props} />
+                                ),
+                                p: ({node, ...props}) => (
+                                  <p className="text-emerald-300 leading-relaxed mb-2" {...props} />
+                                ),
+                                ul: ({node, ...props}) => (
+                                  <ul className="list-disc list-inside text-emerald-100 mb-2 space-y-1" {...props} />
+                                ),
+                                ol: ({node, ...props}) => (
+                                  <ol className="list-decimal list-inside text-emerald-100 mb-2 space-y-1" {...props} />
+                                ),
+                                li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                                strong: ({node, ...props}) => (
+                                  <strong className="text-emerald-200 font-semibold" {...props} />
+                                ),
+                                em: ({node, ...props}) => (
+                                  <em className="italic text-emerald-300" {...props} />
+                                ),
+                                blockquote: ({node, ...props}) => (
+                                  <blockquote
+                                    className="border-l-4 border-emerald-500 pl-3 italic text-emerald-300 my-3"
+                                    {...props}
+                                  />
+                                ),
+                                code({node, inline, className, children, ...props}) {
+                                  const match = /language-(\w+)/.exec(className || "");
+                                  return !inline && match ? (
+                                    <SyntaxHighlighter
+                                      style={vscDarkPlus}
+                                      language={match[1]}
+                                      PreTag="div"
+                                      wrapLongLines
+                                      customStyle={{
+                                        margin: "0.75rem 0",
+                                        borderRadius: "0.5rem",
+                                        padding: "1rem",
+                                        fontSize: "0.85rem",
+                                        background: "#1e1e1e",
+                                      }}
+                                      {...props}
+                                    >
+                                      {String(children).replace(/\n$/, "")}
+                                    </SyntaxHighlighter>
+                                  ) : (
+                                    <code
+                                      className="bg-emerald-900/60 px-1.5 py-0.5 rounded font-mono text-emerald-200"
+                                      {...props}
+                                    >
+                                      {children}
+                                    </code>
+                                  );
+                                },
+                              }}
+                            >
+                              {activeTopicNotes}
+                            </ReactMarkdown>
+                          </div>
                               ) : (
                                 <div className="mt-3 space-y-2">
                                   <Label className="text-emerald-200">
-                                    Edit Markdown (stored per unit in local
-                                    storage)
+                                    Edit Markdown (stored per unit in local storage)
                                   </Label>
                                   <Textarea
                                     className={cn(
                                       emerald.border,
-                                      "w-full min-h-[220px] bg-emerald-950/70 text-emerald-50"
+                                      "w-full min-h-[220px] bg-emerald-950/70 text-emerald-50 resize-y"
                                     )}
                                     value={
-                                      customNotes[u.id]?.length
-                                        ? customNotes[u.id]
-                                        : u.notes
+                                      customNotes[u.id]?.length ? customNotes[u.id] : u.notes
                                     }
                                     onChange={(e) =>
                                       setCustomNotes((prev) => ({
@@ -1418,14 +1767,14 @@ export default function EmbeddedSyllabusPage() {
                                   />
                                   <div className="flex flex-wrap gap-2">
                                     <Button
-                                      className="bg-emerald-700 hover:bg-emerald-600"
+                                      className="bg-emerald-700 cursor-pointer hover:bg-emerald-600"
                                       onClick={() => setTopicEditing(false)}
                                     >
                                       Done
                                     </Button>
                                     <Button
                                       variant="outline"
-                                      className={emerald.border}
+                                      className={emerald.border,"cursor-pointer"}
                                       onClick={() =>
                                         setCustomNotes((prev) => ({
                                           ...prev,
@@ -1444,7 +1793,7 @@ export default function EmbeddedSyllabusPage() {
                                             : u.notes
                                         )
                                       }
-                                      className="bg-emerald-800/60"
+                                      className="bg-emerald-800/60 cursor-pointer hover:text-white hover:bg-emerald-300"
                                     >
                                       Copy
                                     </Button>
@@ -1453,6 +1802,7 @@ export default function EmbeddedSyllabusPage() {
                               )}
                             </div>
                           )}
+
                         </li>
                       ))}
                     </ul>
@@ -1487,7 +1837,7 @@ export default function EmbeddedSyllabusPage() {
               <Button
                 key={id}
                 variant="secondary"
-                className="w-full justify-start bg-emerald-800/50 hover:bg-emerald-700/60"
+                className="w-full justify-start cursor-pointer text-gray-300 bg-emerald-800/50 hover:bg-emerald-700/60"
                 onClick={() => setOpenUnit(u.id)}
               >
                 <Star className="h-4 w-4 mr-2" />
@@ -1531,7 +1881,7 @@ export default function EmbeddedSyllabusPage() {
                   size="icon"
                   className={cn(
                     emerald.border,
-                    "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900"
+                    "bg-emerald-950/60 cursor-pointer text-emerald-100 hover:bg-emerald-500"
                   )}
                   onClick={() => setMarkdownEditing((v) => !v)}
                 >
@@ -1547,7 +1897,7 @@ export default function EmbeddedSyllabusPage() {
                   size="icon"
                   className={cn(
                     emerald.border,
-                    "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900"
+                    "bg-emerald-950/60 cursor-pointer text-emerald-100 hover:bg-emerald-500"
                   )}
                   onClick={readActive}
                   disabled={!activeUnit || !voiceEnabled}
@@ -1574,7 +1924,7 @@ export default function EmbeddedSyllabusPage() {
                   size="icon"
                   className={cn(
                     emerald.border,
-                    "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900"
+                    "bg-emerald-950/60 cursor-pointer text-emerald-100 hover:bg-emerald-500"
                   )}
                   onClick={() => exportActive("md")}
                   disabled={!activeUnit}
@@ -1591,7 +1941,7 @@ export default function EmbeddedSyllabusPage() {
                   size="icon"
                   className={cn(
                     emerald.border,
-                    "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900"
+                    "bg-emerald-950/60 cursor-pointer text-emerald-100 hover:bg-emerald-500"
                   )}
                   onClick={shareLink}
                   disabled={!activeUnit}
@@ -1613,17 +1963,17 @@ export default function EmbeddedSyllabusPage() {
         )}
         {activeUnit && (
           <Tabs defaultValue="notes">
-            <TabsList className="bg-emerald-900/60 flex flex-wrap">
-              <TabsTrigger value="notes">Notes</TabsTrigger>
-              <TabsTrigger value="quiz">Quiz</TabsTrigger>
-              <TabsTrigger value="tasks">Tasks</TabsTrigger>
-              <TabsTrigger value="resources">Resources</TabsTrigger>
+            <TabsList className="bg-emerald-400 flex flex-wrap">
+              <TabsTrigger value="notes" className="cursor-pointer data-[state=active]:text-white data-[state=active]:bg-emerald-900">Notes</TabsTrigger>
+              <TabsTrigger value="quiz" className="cursor-pointer data-[state=active]:text-white data-[state=active]:bg-emerald-900">Quiz</TabsTrigger>
+              <TabsTrigger value="tasks" className="cursor-pointer data-[state=active]:text-white data-[state=active]:bg-emerald-900">Tasks</TabsTrigger>
+             
             </TabsList>
 
             {/* NOTES */}
             <TabsContent value="notes" className="pt-4">
-              <div className="flex flex-col lg:flex-row items-start gap-6">
-                <div className="flex-1 min-w-0 w-full">
+              <div className="flex flex-col lg:flex-row rounded-2xl border border-emerald-400/50 bg-black/50 items-start gap-6">
+                <div className="flex-1 min-w-0 p-5 w-full">
                   {!markdownEditing ? (
                     <article
                       className={cn(
@@ -1631,9 +1981,72 @@ export default function EmbeddedSyllabusPage() {
                         densityClass
                       )}
                     >
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {activeNotes}
-                      </ReactMarkdown>
+                       <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                h1: ({node, ...props}) => (
+                                  <h1 className="text-emerald-300 text-xl font-bold " {...props} />
+                                ),
+                                h2: ({node, ...props}) => (
+                                  <h2 className="text-emerald-300 text-lg font-semibold " {...props} />
+                                ),
+                                h3: ({node, ...props}) => (
+                                  <h3 className="text-emerald-300 text-base font-semibold " {...props} />
+                                ),
+                                p: ({node, ...props}) => (
+                                  <p className="text-emerald-300 leading-relaxed " {...props} />
+                                ),
+                                ul: ({node, ...props}) => (
+                                  <ul className="list-disc list-inside text-emerald-100 " {...props} />
+                                ),
+                                ol: ({node, ...props}) => (
+                                  <ol className="list-decimal list-inside text-emerald-100 " {...props} />
+                                ),
+                                li: ({node, ...props}) => <li  {...props} />,
+                                strong: ({node, ...props}) => (
+                                  <strong className="text-emerald-200 font-semibold" {...props} />
+                                ),
+                                em: ({node, ...props}) => (
+                                  <em className="italic text-emerald-300" {...props} />
+                                ),
+                                blockquote: ({node, ...props}) => (
+                                  <blockquote
+                                    className="border-l-4 border-emerald-500  italic text-emerald-300 my-3"
+                                    {...props}
+                                  />
+                                ),
+                                code({node, inline, className, children, ...props}) {
+                                  const match = /language-(\w+)/.exec(className || "");
+                                  return !inline && match ? (
+                                    <SyntaxHighlighter
+                                      style={vscDarkPlus}
+                                      language={match[1]}
+                                      PreTag="div"
+                                      wrapLongLines
+                                      customStyle={{
+                                        margin: "0.75rem 0",
+                                        borderRadius: "0.5rem",
+                                        padding: "1rem",
+                                        fontSize: "0.85rem",
+                                        background: "#1e1e1e",
+                                      }}
+                                      {...props}
+                                    >
+                                      {String(children).replace(/\n$/, "")}
+                                    </SyntaxHighlighter>
+                                  ) : (
+                                    <code
+                                      className="bg-emerald-900/60 px-1.5 py-0.5 rounded font-mono text-emerald-200"
+                                      {...props}
+                                    >
+                                      {children}
+                                    </code>
+                                  );
+                                },
+                              }}
+                            >
+                              {activeNotes}
+                            </ReactMarkdown>
                     </article>
                   ) : (
                     <div className="space-y-2">
@@ -1658,13 +2071,13 @@ export default function EmbeddedSyllabusPage() {
                       <div className="flex flex-wrap gap-2">
                         <Button
                           onClick={() => setMarkdownEditing(false)}
-                          className="bg-emerald-700 hover:bg-emerald-600"
+                          className="bg-emerald-700 cursor-pointer hover:bg-emerald-600"
                         >
                           Done
                         </Button>
                         <Button
                           variant="outline"
-                          className={emerald.border}
+                          className={emerald.border,"cursor-pointer"}
                           onClick={() =>
                             setCustomNotes((prev) => ({
                               ...prev,
@@ -1682,7 +2095,7 @@ export default function EmbeddedSyllabusPage() {
                                 activeUnit.notes
                             )
                           }
-                          className="bg-emerald-800/60"
+                          className="bg-emerald-800/60 cursor-pointer hover:text-white hover:bg-emerald-300"
                         >
                           Copy
                         </Button>
@@ -1692,7 +2105,7 @@ export default function EmbeddedSyllabusPage() {
                 </div>
 
                 {/* Sidebar widgets */}
-                <aside className="w-full lg:w-64 shrink-0 space-y-3">
+                <aside className="w-full p-2 lg:w-64 shrink-0 space-y-3">
                   <Card className={cn(emerald.panel, emerald.border)}>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm text-emerald-100 flex items-center gap-2">
@@ -1739,7 +2152,7 @@ export default function EmbeddedSyllabusPage() {
 
             {/* Footer */}
             <footer className="text-emerald-400/80 text-xs text-center py-6">
-              Built with React, shadcn/ui, Framer Motion, and Three.js.
+    
               Shortcuts: Ctrl/Cmd+K (Search), Ctrl/Cmd+P (Print), Ctrl/Cmd+B (Bookmark), Ctrl/Cmd+M (Read).
             </footer>
           </section>
