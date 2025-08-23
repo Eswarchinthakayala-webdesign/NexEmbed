@@ -17,6 +17,7 @@ import LineFollowerBotSimulator from "./pages/LineFollowerBotSimulator";
 import WeatherStationSimulator from "./pages/WeatherStationSimulator";
 import DetailsPage from "./pages/DetailsPage";
 import EmbeddedESQuizPro from "./pages/EmbeddedESQuizPro";
+import EmbeddedSyllabusPage from "./pages/EmbeddedSyllabusPage";
 // Sonner
 import { Toaster } from "sonner";
 
@@ -49,6 +50,7 @@ function App() {
             <Route path="/weather-station" element={<WeatherStationSimulator />} />
             <Route path="/details" element={<DetailsPage/>}/>
             <Route path="/quiz" element={<EmbeddedESQuizPro/>}/>
+            <Route path="/syllabus" element={<EmbeddedSyllabusPage/>}/>
           </Routes>
         </main>
 

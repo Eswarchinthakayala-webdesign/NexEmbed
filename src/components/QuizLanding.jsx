@@ -180,7 +180,7 @@ function useLineOrient(group, lines) {
 // -----------------------------
 // Orbiting holographic option panels with subtle 3D bending + glow
 // -----------------------------
-function OrbitPanel({ label = "A", angle = 0, radius = 2.8, color = "#a7f3d0", active = false, onClick }) {
+function OrbitPanel({ label = "Q", angle = 0, radius = 2.8, color = "#a7f3d0", active = false, onClick }) {
   const ref = useRef();
   const plane = useRef();
   useFrame(({ clock }) => {
@@ -329,11 +329,11 @@ function NeuralCosmosScene() {
         </group>
       </Float>
 
-      {/* Orbiting panels (A/B/C/D) */}
-      <OrbitPanel label="A" angle={0} radius={3.0} active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
-      <OrbitPanel label="B" angle={Math.PI / 2} radius={3.1} active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
-      <OrbitPanel label="C" angle={Math.PI} radius={2.8} active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
-      <OrbitPanel label="D" angle={(3 * Math.PI) / 2} radius={3.2} active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+      {/* Orbiting panels (Q/U/I/z) */}
+      <OrbitPanel label="Q" angle={0} radius={3.0} active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+      <OrbitPanel label="U" angle={Math.PI / 2} radius={3.1} active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+      <OrbitPanel label="I" angle={Math.PI} radius={2.8} active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+      <OrbitPanel label="Z" angle={(3 * Math.PI) / 2} radius={3.2} active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
 
       {/* Spark along curve from active panel to brain */}
       {spark && <Spark key={spark.key} curve={spark.curve} duration={1.4} />}

@@ -1,7 +1,7 @@
 // src/components/layout/Navbar.jsx
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Cpu, Home, Computer, FolderKanban, Info, FileQuestionMark, LifeBuoy } from "lucide-react";
+import { Menu, X, Cpu, Home, Computer, FolderKanban, Info, FileQuestionMark, LifeBuoy, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
@@ -10,6 +10,7 @@ const navLinks = [
   { name: "Simulator", path: "/simulator",icon:<Computer size={20}/> },
   { name: "Projects", path: "/projects",icon:<FolderKanban size={20}/> },
   { name: "Details", path: "/details",icon:<Info size={20}/> },
+  {name:"Syllabus",path:"/syllabus",icon:<FileText size={20}/>},
   {name:"Quiz",path:"/quiz",icon:<FileQuestionMark size={20}/>},
   { name: "Help", path: "/help",icon:<LifeBuoy size={20}/> },
 ];
