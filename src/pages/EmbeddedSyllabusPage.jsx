@@ -423,6 +423,47 @@ function copyToClipboard(text) {
 }
 
 /* ============================================================
+   NEW: Extract a subtopic's markdown slice from a unit
+   ============================================================ */
+function extractTopicNotes(unit, topic) {
+  if (!unit || !topic) return "";
+  const lines = unit.notes.split("\n");
+  const target = topic.trim().toLowerCase();
+  let buf = [];
+  let started = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const l = line.trim().toLowerCase();
+
+    // Treat headings "## <topic>" as anchors; also allow fuzzy include of topic text in a heading line
+    const isHeading = l.startsWith("## ");
+    const isTopicHeading = isHeading && (l === `## ${target}` || l.includes(target));
+
+    if (!started && isTopicHeading) {
+      started = true;
+      // ensure heading remains
+      buf.push(lines[i]);
+      continue;
+    }
+
+    if (started) {
+      // stop at the next "## " heading (but not the first line we already captured)
+      if (isHeading) break;
+      buf.push(lines[i]);
+    }
+  }
+
+  if (!started) {
+    // fallback: return a stub section if not found
+    return `## ${topic}\n\n(Details coming soon…)`;
+  }
+
+  const joined = buf.join("\n").trim();
+  return joined.length ? joined : `## ${topic}\n\n(Details coming soon…)`;
+}
+
+/* ============================================================
    Three.js Emerald 3D Background (JSX)
    ============================================================ */
 function Scene3D({ intensity = 1 }) {
@@ -897,6 +938,9 @@ export default function EmbeddedSyllabusPage() {
   const [theme, setTheme] = useLocalStorage("theme", "emerald-dark");
   const { speak, stop, speaking } = useSpeech();
 
+  // NEW: editor toggle for subtopic view
+  const [topicEditing, setTopicEditing] = useState(false);
+
   const filtered = useMemo(() => filterUnits(query), [query]);
   const activeUnit = useMemo(() => UNITS.find((u) => u.id === openUnit) || null, [openUnit]);
   const activeNotes = useMemo(() => {
@@ -904,6 +948,16 @@ export default function EmbeddedSyllabusPage() {
     const override = customNotes[activeUnit.id];
     return override && override.trim().length > 0 ? override : activeUnit.notes;
   }, [activeUnit, customNotes]);
+
+  // NEW: compute the notes for the selected subtopic from active unit
+  const activeTopicNotes = useMemo(() => {
+    if (!activeUnit || !selectedTopic) return "";
+    const source = customNotes[activeUnit.id] && customNotes[activeUnit.id].trim().length
+      ? customNotes[activeUnit.id]
+      : activeUnit.notes;
+    // Use a temporary unit object with selected source
+    return extractTopicNotes({ ...activeUnit, notes: source }, selectedTopic);
+  }, [activeUnit, selectedTopic, customNotes]);
 
   const progress = useMemo(() => {
     const total = UNITS.length;
@@ -988,466 +1042,700 @@ export default function EmbeddedSyllabusPage() {
         <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-emerald-900/40 via-emerald-950 to-black" />
 
         {/* Header */}
-        <motion.header
-          className={cn("sticky top-0 z-20", emerald.panel, emerald.border)}
-          initial={{ y: -40, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 120, damping: 14 }}
-        >
-          <div className="mx-auto max-w-7xl px-4 py-3 flex items-center gap-3">
-            <Rocket className="h-6 w-6 text-emerald-400" />
-            <h1 className="font-semibold tracking-tight text-emerald-200">
-              Embedded Systems — Interactive Notes
-            </h1>
-            <Badge className="ml-2 bg-emerald-700/60 text-emerald-50 border border-emerald-600/40">
-              Emerald Dark
-            </Badge>
-            <div className="ml-auto flex items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-emerald-300" />
-                <Input
-                  id="global-search"
-                  placeholder="Search units, topics, notes (Ctrl+K)…"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  className={cn(
-                    emerald.border,
-                    "pl-8 bg-emerald-950/70 text-emerald-50 placeholder:text-emerald-300/60 w-72"
-                  )}
-                />
-              </div>
+    <motion.header
+  className={cn("sticky top-0 z-20", emerald.panel, emerald.border)}
+  initial={{ y: -40, opacity: 0 }}
+  animate={{ y: 0, opacity: 1 }}
+  transition={{ type: "spring", stiffness: 120, damping: 14 }}
+>
+  <div className="mx-auto max-w-7xl px-3 sm:px-4 py-2 sm:py-3 flex flex-wrap items-center gap-2 sm:gap-3">
+    {/* Logo + Title */}
+    <div className="flex items-center gap-2 min-w-0">
+      <Rocket className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-400 shrink-0" />
+      <h1 className="font-semibold tracking-tight text-emerald-200 text-sm sm:text-base truncate">
+        Embedded Systems — <span className="hidden sm:inline">Interactive Notes</span>
+      </h1>
+      <Badge className="ml-1 sm:ml-2 bg-emerald-700/60 text-emerald-50 border border-emerald-600/40 text-xs sm:text-sm">
+        Emerald Dark
+      </Badge>
+    </div>
 
-              {/* Settings */}
+    {/* Right-side controls */}
+    <div className="ml-auto flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
+      {/* Search */}
+      <div className="relative flex-1 sm:flex-none">
+        <Search className="absolute left-2 top-2.5 h-4 w-4 text-emerald-300" />
+        <Input
+          id="global-search"
+          placeholder="Search…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className={cn(
+            emerald.border,
+            "pl-8 bg-emerald-950/70 text-emerald-50 placeholder:text-emerald-300/60 w-full sm:w-72 text-sm sm:text-base"
+          )}
+        />
+      </div>
+
+      {/* Settings */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            className={cn(
+              emerald.border,
+              "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900"
+            )}
+            size="sm"
+          >
+            <Settings className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Settings</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          className={cn(
+            emerald.panel,
+            emerald.border,
+            "w-72 sm:w-80 text-emerald-50 p-2"
+          )}
+        >
+          <DropdownMenuLabel>Display</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <div className="space-y-4">
+            {/* Density */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <Label className="text-emerald-100">Density</Label>
+              <Slider
+                value={[density]}
+                min={0}
+                max={2}
+                step={1}
+                onValueChange={(v) => setDensity(v[0])}
+                className="w-full sm:w-40"
+              />
+            </div>
+
+            {/* Contrast */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <Label className="text-emerald-100">Contrast</Label>
+              <Slider
+                value={[contrast]}
+                min={0.75}
+                max={1.25}
+                step={0.25}
+                onValueChange={(v) => setContrast(v[0])}
+                className="w-full sm:w-40"
+              />
+            </div>
+
+            {/* Animation Intensity */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <Label className="text-emerald-100">Animation intensity</Label>
+              <Slider
+                value={[animIntensity]}
+                min={0}
+                max={2}
+                step={0.5}
+                onValueChange={(v) => setAnimIntensity(v[0])}
+                className="w-full sm:w-40"
+              />
+            </div>
+
+            {/* Zen Mode */}
+            <div className="flex items-center justify-between">
+              <Label className="text-emerald-100">Zen mode</Label>
+              <Switch checked={zen} onCheckedChange={setZen} />
+            </div>
+
+            {/* Voice Read-out */}
+            <div className="flex items-center justify-between">
+              <Label className="text-emerald-100">Voice read-out</Label>
+              <Switch checked={voiceEnabled} onCheckedChange={setVoiceEnabled} />
+            </div>
+
+            {/* Theme */}
+            <div className="flex items-center justify-between">
+              <Label className="text-emerald-100">Theme</Label>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant="outline"
-                    className={cn(
-                      emerald.border,
-                      "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900"
-                    )}
                     size="sm"
+                    variant="secondary"
+                    className="bg-emerald-800/60 text-xs sm:text-sm"
                   >
-                    <Settings className="h-4 w-4 mr-2" /> Settings
+                    {theme}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className={cn(emerald.panel, emerald.border, "w-80 text-emerald-50")}>
-                  <DropdownMenuLabel>Display</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <div className="px-2 py-1.5 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-emerald-100">Density</Label>
-                      <Slider value={[density]} min={0} max={2} step={1} onValueChange={(v) => setDensity(v[0])} className="w-40" />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label className="text-emerald-100">Contrast</Label>
-                      <Slider value={[contrast]} min={0.75} max={1.25} step={0.25} onValueChange={(v) => setContrast(v[0])} className="w-40" />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label className="text-emerald-100">Animation intensity</Label>
-                      <Slider value={[animIntensity]} min={0} max={2} step={0.5} onValueChange={(v) => setAnimIntensity(v[0])} className="w-40" />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label className="text-emerald-100">Zen mode</Label>
-                      <Switch checked={zen} onCheckedChange={setZen} />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label className="text-emerald-100">Voice read-out</Label>
-                      <Switch checked={voiceEnabled} onCheckedChange={setVoiceEnabled} />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label className="text-emerald-100">Theme</Label>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button size="sm" variant="secondary" className="bg-emerald-800/60">
-                            {theme}
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className={cn(emerald.panel, emerald.border)}>
-                          <DropdownMenuItem onClick={() => setTheme("emerald-dark")}>
-                            <Moon className="h-4 w-4 mr-2" /> Emerald Dark
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setTheme("emerald-darker")}>
-                            <Moon className="h-4 w-4 mr-2" /> Emerald Darker
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setTheme("emerald-neon")}>
-                            <Sun className="h-4 w-4 mr-2" /> Emerald Neon
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
+                <DropdownMenuContent
+                  className={cn(emerald.panel, emerald.border, "w-40")}
+                >
+                  <DropdownMenuItem onClick={() => setTheme("emerald-dark")}>
+                    <Moon className="h-4 w-4 mr-2" /> Emerald Dark
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("emerald-darker")}>
+                    <Moon className="h-4 w-4 mr-2" /> Emerald Darker
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("emerald-neon")}>
+                    <Sun className="h-4 w-4 mr-2" /> Emerald Neon
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      emerald.border,
-                      "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900"
-                    )}
-                    onClick={() => window.print()}
-                    size="sm"
-                  >
-                    <Printer className="h-4 w-4 mr-2" /> Print
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Ctrl/Cmd + P</TooltipContent>
-              </Tooltip>
             </div>
           </div>
-        </motion.header>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Print */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="outline"
+            className={cn(
+              emerald.border,
+              "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900"
+            )}
+            onClick={() => window.print()}
+            size="sm"
+          >
+            <Printer className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Print</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Ctrl/Cmd + P</TooltipContent>
+      </Tooltip>
+    </div>
+  </div>
+</motion.header>
 
         {/* Layout */}
-        <main className={cn("mx-auto max-w-7xl px-4 py-6 grid gap-6", zen ? "grid-cols-1" : "lg:grid-cols-12")}>
-          {/* Sidebar */}
-          <section className={cn("space-y-4", zen ? "col-span-12" : "lg:col-span-4")}>
-            {/* Progress Card */}
-            <Card className={cn(emerald.panel, emerald.border)}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-emerald-100">
-                  <Layers className="h-5 w-5" />
-                  Course Outline
-                </CardTitle>
-                <CardDescription className="text-emerald-300">
-                  Explore Units → Topics → Notes. Bookmark units and track completion.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-emerald-200">Overall Progress</span>
-                  <span className="text-emerald-300 text-sm">{progress}%</span>
-                </div>
-                <Progress value={progress} className="h-2 bg-emerald-950" />
-              </CardContent>
-              <CardFooter>
-                <div className="text-xs text-emerald-300">
-                  Tip: Use <kbd className="px-1 py-0.5 rounded bg-emerald-800/40 border border-emerald-700">Ctrl/Cmd + K</kbd> to search fast.
-                </div>
-              </CardFooter>
-            </Card>
+        <main
+  className={cn(
+    "mx-auto max-w-7xl px-4 py-6 grid gap-6",
+    zen ? "grid-cols-1" : "lg:grid-cols-12"
+  )}
+>
+  {/* Sidebar */}
+  <section className={cn("space-y-4", zen ? "col-span-12" : "lg:col-span-4")}>
+    {/* Progress Card */}
+    <Card className={cn(emerald.panel, emerald.border)}>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-emerald-100">
+          <Layers className="h-5 w-5" />
+          Course Outline
+        </CardTitle>
+        <CardDescription className="text-emerald-300">
+          Explore Units → Topics → Notes. Bookmark units and track completion.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-emerald-200">Overall Progress</span>
+          <span className="text-emerald-300 text-sm">{progress}%</span>
+        </div>
+        <Progress value={progress} className="h-2 bg-emerald-950" />
+      </CardContent>
+      <CardFooter>
+        <div className="text-xs text-emerald-300">
+          Tip: Use{" "}
+          <kbd className="px-1 py-0.5 rounded bg-emerald-800/40 border border-emerald-700">
+            Ctrl/Cmd + K
+          </kbd>{" "}
+          to search fast.
+        </div>
+      </CardFooter>
+    </Card>
 
-            {/* Units Accordion */}
-            <Card className={cn(emerald.panel, emerald.border)}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-emerald-100 flex items-center gap-2">
-                  <ListTodo className="h-5 w-5" /> Units
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Accordion
-                  type="single"
-                  collapsible
-                  value={openUnit || undefined}
-                  onValueChange={(val) => setOpenUnit(val || null)}
-                >
-                  {filtered.map((u) => {
-                    const isBookmarked = bookmarks.includes(u.id);
-                    const done = !!progressMap[u.id];
-                    return (
-                      <AccordionItem
-                        key={u.id}
-                        value={u.id}
-                        className={cn(emerald.border, "rounded-xl mb-2 overflow-hidden")}
-                      >
-                        <AccordionTrigger className="hover:no-underline">
-                          <div className="flex items-center gap-2 w-full">
-                            <Badge className="bg-emerald-700/70 border-emerald-600/50">
-                              {u.id.toUpperCase()}
-                            </Badge>
-                            <span className="text-left flex-1">{u.title}</span>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="text-emerald-300 hover:text-emerald-100"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleBookmark(u.id);
-                                  }}
-                                >
-                                  {isBookmarked ? (
-                                    <Bookmark className="h-4 w-4" />
-                                  ) : (
-                                    <BookmarkPlus className="h-4 w-4" />
-                                  )}
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                {isBookmarked ? "Remove bookmark" : "Bookmark"}
-                              </TooltipContent>
-                            </Tooltip>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="text-emerald-300 hover:text-emerald-100"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    markComplete(u.id, !done);
-                                  }}
-                                >
-                                  <Check className={cn("h-4 w-4", done ? "text-emerald-400" : "")} />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                {done ? "Mark incomplete" : "Mark complete"}
-                              </TooltipContent>
-                            </Tooltip>
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <div className="px-2 pb-3">
-                            <ul className="space-y-1">
-                              {u.topics.map((t, idx) => (
-                                <li key={idx}>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="w-full justify-start text-emerald-200 hover:text-emerald-50"
-                                    onClick={() => setSelectedTopic(t)}
-                                  >
-                                    <ChevronRight className="h-4 w-4 mr-2" />
-                                    {t}
-                                  </Button>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    );
-                  })}
-                </Accordion>
-              </CardContent>
-            </Card>
-
-            {/* Bookmarks */}
-            <Card className={cn(emerald.panel, emerald.border)}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-emerald-100 flex items-center gap-2">
-                  <Star className="h-5 w-5" /> Bookmarks
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {bookmarks.length === 0 && (
-                    <div className="text-emerald-300 text-sm">
-                      No bookmarks yet. Click the{" "}
-                      <BookmarkPlus className="inline h-4 w-4" /> icon on any unit.
-                    </div>
-                  )}
-                  {bookmarks.map((id) => {
-                    const u = UNITS.find((x) => x.id === id);
-                    if (!u) return null;
-                    return (
-                      <Button
-                        key={id}
-                        variant="secondary"
-                        className="w-full justify-start bg-emerald-800/50 hover:bg-emerald-700/60"
-                        onClick={() => setOpenUnit(u.id)}
-                      >
-                        <Star className="h-4 w-4 mr-2" />
-                        {u.title}
-                      </Button>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-
-          {/* Main content */}
-          <section className={cn(zen ? "col-span-12" : "lg:col-span-8", "space-y-4")}>
-            <Card className={cn(emerald.panel, emerald.border)}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-emerald-100 flex items-center gap-2">
-                      <BookOpen className="h-5 w-5" />
-                      {activeUnit ? activeUnit.title : "Select a Unit"}
-                    </CardTitle>
-                    <CardDescription className="text-emerald-300">
-                      {selectedTopic
-                        ? `Topic: ${selectedTopic}`
-                        : activeUnit
-                        ? "Click a topic on the left to highlight a section."
-                        : "Use the Units panel to open a unit."}
-                    </CardDescription>
-                  </div>
-                  <div className="flex items-center gap-2">
+    {/* Units Accordion */}
+    <Card className={cn(emerald.panel, emerald.border)}>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-emerald-100 flex items-center gap-2">
+          <ListTodo className="h-5 w-5" /> Units
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Accordion
+          type="single"
+          collapsible
+          value={openUnit || undefined}
+          onValueChange={(val) => setOpenUnit(val || null)}
+        >
+          {filtered.map((u) => {
+            const isBookmarked = bookmarks.includes(u.id);
+            const done = !!progressMap[u.id];
+            return (
+              <AccordionItem
+                key={u.id}
+                value={u.id}
+                className={cn(
+                  emerald.border,
+                  "rounded-xl mb-2 overflow-hidden"
+                )}
+              >
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex items-center gap-2 w-full">
+                    <Badge className="bg-emerald-700/70 border-emerald-600/50">
+                      {u.id.toUpperCase()}
+                    </Badge>
+                    <span className="text-left flex-1">{u.title}</span>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="icon"
-                          className={cn(emerald.border, "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900")}
-                          onClick={() => setMarkdownEditing((v) => !v)}
+                          className="text-emerald-300 hover:text-emerald-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleBookmark(u.id);
+                          }}
                         >
-                          <Code2 className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Edit Markdown</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className={cn(emerald.border, "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900")}
-                          onClick={readActive}
-                          disabled={!activeUnit || !voiceEnabled}
-                        >
-                          {speaking ? <Pause className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                          {isBookmarked ? (
+                            <Bookmark className="h-4 w-4" />
+                          ) : (
+                            <BookmarkPlus className="h-4 w-4" />
+                          )}
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        {voiceEnabled ? (speaking ? "Pause" : "Read out") : "Enable voice in settings"}
+                        {isBookmarked ? "Remove bookmark" : "Bookmark"}
                       </TooltipContent>
                     </Tooltip>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="icon"
-                          className={cn(emerald.border, "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900")}
-                          onClick={() => exportActive("md")}
-                          disabled={!activeUnit}
+                          className="text-emerald-300 hover:text-emerald-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            markComplete(u.id, !done);
+                          }}
                         >
-                          <Download className="h-4 w-4" />
+                          <Check
+                            className={cn(
+                              "h-4 w-4",
+                              done ? "text-emerald-400" : ""
+                            )}
+                          />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>Export Markdown</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className={cn(emerald.border, "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900")}
-                          onClick={shareLink}
-                          disabled={!activeUnit}
-                        >
-                          <Share2 className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Share Link</TooltipContent>
+                      <TooltipContent>
+                        {done ? "Mark incomplete" : "Mark complete"}
+                      </TooltipContent>
                     </Tooltip>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {!activeUnit && (
-                  <div className="text-emerald-300">
-                    Start by expanding a unit on the left. You can read, edit, export, or print notes.
-                  </div>
-                )}
-                {activeUnit && (
-                  <Tabs defaultValue="notes">
-                    <TabsList className="bg-emerald-900/60">
-                      <TabsTrigger value="notes">Notes</TabsTrigger>
-                      <TabsTrigger value="quiz">Quiz</TabsTrigger>
-                      <TabsTrigger value="tasks">Tasks</TabsTrigger>
-                      <TabsTrigger value="resources">Resources</TabsTrigger>
-                    </TabsList>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="px-2 pb-3">
+                    <ul className="space-y-1">
+                      {u.topics.map((t, idx) => (
+                        <li key={idx}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="w-full justify-start text-emerald-200 hover:text-emerald-50"
+                            onClick={() => {
+                              setSelectedTopic((cur) =>
+                                cur === t ? null : t
+                              );
+                              setTopicEditing(false);
+                            }}
+                          >
+                            <ChevronRight className="h-4 w-4 mr-2" />
+                            {t}
+                          </Button>
 
-                    {/* NOTES */}
-                    <TabsContent value="notes" className="pt-4">
-                      <div className="flex items-start gap-6">
-                        <div className="flex-1 min-w-0">
-                          {!markdownEditing ? (
-                            <article className={cn("prose prose-invert max-w-none", densityClass)}>
-                              <ReactMarkdown remarkPlugins={[remarkGfm]}>{activeNotes}</ReactMarkdown>
-                            </article>
-                          ) : (
-                            <div className="space-y-2">
-                              <Label className="text-emerald-200">Edit Markdown (stored locally)</Label>
-                              <Textarea
-                                className={cn(emerald.border, "min-h-[420px] bg-emerald-950/70 text-emerald-50")}
-                                value={customNotes[activeUnit.id] ?? activeUnit.notes}
-                                onChange={(e) =>
-                                  setCustomNotes((prev) => ({ ...prev, [activeUnit.id]: e.target.value }))
-                                }
-                              />
-                              <div className="flex gap-2">
-                                <Button
-                                  onClick={() => setMarkdownEditing(false)}
-                                  className="bg-emerald-700 hover:bg-emerald-600"
-                                >
-                                  Done
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  className={emerald.border}
-                                  onClick={() =>
-                                    setCustomNotes((prev) => ({ ...prev, [activeUnit.id]: "" }))
-                                  }
-                                >
-                                  Reset to Default
-                                </Button>
-                                <Button
-                                  variant="secondary"
-                                  onClick={() =>
-                                    copyToClipboard(customNotes[activeUnit.id] ?? activeUnit.notes)
-                                  }
-                                  className="bg-emerald-800/60"
-                                >
-                                  Copy
-                                </Button>
+                          {/* Inline responsive container */}
+                          {selectedTopic === t && openUnit === u.id && (
+                            <div className="mt-2 w-full rounded-xl border border-emerald-800/60 bg-emerald-950/40 p-3">
+                              <div className="flex items-center justify-between flex-wrap gap-2">
+                                <h4 className="text-emerald-100 font-semibold">
+                                  {t}
+                                </h4>
+                                <div className="flex items-center gap-2">
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        size="icon"
+                                        variant="outline"
+                                        className={emerald.border}
+                                        onClick={() => setTopicEditing(false)}
+                                        aria-label="View (Preview)"
+                                      >
+                                        <BookOpen className="h-4 w-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      View (Markdown Preview)
+                                    </TooltipContent>
+                                  </Tooltip>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        size="icon"
+                                        variant="outline"
+                                        className={emerald.border}
+                                        onClick={() => setTopicEditing(true)}
+                                        aria-label="Editor (Markdown)"
+                                      >
+                                        <Code2 className="h-4 w-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      Editor (Markdown)
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
                               </div>
+
+                              {!topicEditing ? (
+                                <div className="prose prose-invert max-w-none text-sm mt-3 break-words whitespace-pre-wrap">
+                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {activeTopicNotes}
+                                  </ReactMarkdown>
+                                </div>
+                              ) : (
+                                <div className="mt-3 space-y-2">
+                                  <Label className="text-emerald-200">
+                                    Edit Markdown (stored per unit in local
+                                    storage)
+                                  </Label>
+                                  <Textarea
+                                    className={cn(
+                                      emerald.border,
+                                      "w-full min-h-[220px] bg-emerald-950/70 text-emerald-50"
+                                    )}
+                                    value={
+                                      customNotes[u.id]?.length
+                                        ? customNotes[u.id]
+                                        : u.notes
+                                    }
+                                    onChange={(e) =>
+                                      setCustomNotes((prev) => ({
+                                        ...prev,
+                                        [u.id]: e.target.value,
+                                      }))
+                                    }
+                                  />
+                                  <div className="flex flex-wrap gap-2">
+                                    <Button
+                                      className="bg-emerald-700 hover:bg-emerald-600"
+                                      onClick={() => setTopicEditing(false)}
+                                    >
+                                      Done
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      className={emerald.border}
+                                      onClick={() =>
+                                        setCustomNotes((prev) => ({
+                                          ...prev,
+                                          [u.id]: "",
+                                        }))
+                                      }
+                                    >
+                                      Reset to Default
+                                    </Button>
+                                    <Button
+                                      variant="secondary"
+                                      onClick={() =>
+                                        copyToClipboard(
+                                          customNotes[u.id]?.length
+                                            ? customNotes[u.id]
+                                            : u.notes
+                                        )
+                                      }
+                                      className="bg-emerald-800/60"
+                                    >
+                                      Copy
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           )}
-                        </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
+        </Accordion>
+      </CardContent>
+    </Card>
 
-                        {/* Sidebar widgets */}
-                        <aside className="w-64 shrink-0 space-y-3">
-                          <Card className={cn(emerald.panel, emerald.border)}>
-                            <CardHeader className="pb-2">
-                              <CardTitle className="text-sm text-emerald-100 flex items-center gap-2">
-                                <AlarmClock className="h-4 w-4" /> Study Timer
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                              <StudyTimer />
-                            </CardContent>
-                          </Card>
+    {/* Bookmarks */}
+    <Card className={cn(emerald.panel, emerald.border)}>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-emerald-100 flex items-center gap-2">
+          <Star className="h-5 w-5" /> Bookmarks
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          {bookmarks.length === 0 && (
+            <div className="text-emerald-300 text-sm">
+              No bookmarks yet. Click the{" "}
+              <BookmarkPlus className="inline h-4 w-4" /> icon on any unit.
+            </div>
+          )}
+          {bookmarks.map((id) => {
+            const u = UNITS.find((x) => x.id === id);
+            if (!u) return null;
+            return (
+              <Button
+                key={id}
+                variant="secondary"
+                className="w-full justify-start bg-emerald-800/50 hover:bg-emerald-700/60"
+                onClick={() => setOpenUnit(u.id)}
+              >
+                <Star className="h-4 w-4 mr-2" />
+                {u.title}
+              </Button>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  </section>
 
-                          <Card className={cn(emerald.panel, emerald.border)}>
-                            <CardHeader className="pb-2">
-                              <CardTitle className="text-sm text-emerald-100 flex items-center gap-2">
-                                <BrainCircuit className="h-4 w-4" /> Key Ideas
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                              <KeyIdeas unit={activeUnit} />
-                            </CardContent>
-                          </Card>
-                        </aside>
+  {/* Main content */}
+  <section
+    className={cn(
+      zen ? "col-span-12" : "lg:col-span-8",
+      "space-y-4"
+    )}
+  >
+    <Card className={cn(emerald.panel, emerald.border)}>
+      <CardHeader>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0">
+            <CardTitle className="text-emerald-100 flex items-center gap-2 truncate">
+              <BookOpen className="h-5 w-5" />
+              {activeUnit ? activeUnit.title : "Select a Unit"}
+            </CardTitle>
+            <CardDescription className="text-emerald-300">
+              {selectedTopic
+                ? `Topic: ${selectedTopic}`
+                : activeUnit
+                ? "Click a topic on the left to highlight a section."
+                : "Use the Units panel to open a unit."}
+            </CardDescription>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={cn(
+                    emerald.border,
+                    "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900"
+                  )}
+                  onClick={() => setMarkdownEditing((v) => !v)}
+                >
+                  <Code2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Edit Markdown</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={cn(
+                    emerald.border,
+                    "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900"
+                  )}
+                  onClick={readActive}
+                  disabled={!activeUnit || !voiceEnabled}
+                >
+                  {speaking ? (
+                    <Pause className="h-4 w-4" />
+                  ) : (
+                    <Volume2 className="h-4 w-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {voiceEnabled
+                  ? speaking
+                    ? "Pause"
+                    : "Read out"
+                  : "Enable voice in settings"}
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={cn(
+                    emerald.border,
+                    "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900"
+                  )}
+                  onClick={() => exportActive("md")}
+                  disabled={!activeUnit}
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Export Markdown</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={cn(
+                    emerald.border,
+                    "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900"
+                  )}
+                  onClick={shareLink}
+                  disabled={!activeUnit}
+                >
+                  <Share2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Share Link</TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {!activeUnit && (
+          <div className="text-emerald-300">
+            Start by expanding a unit on the left. You can read, edit, export, or
+            print notes.
+          </div>
+        )}
+        {activeUnit && (
+          <Tabs defaultValue="notes">
+            <TabsList className="bg-emerald-900/60 flex flex-wrap">
+              <TabsTrigger value="notes">Notes</TabsTrigger>
+              <TabsTrigger value="quiz">Quiz</TabsTrigger>
+              <TabsTrigger value="tasks">Tasks</TabsTrigger>
+              <TabsTrigger value="resources">Resources</TabsTrigger>
+            </TabsList>
+
+            {/* NOTES */}
+            <TabsContent value="notes" className="pt-4">
+              <div className="flex flex-col lg:flex-row items-start gap-6">
+                <div className="flex-1 min-w-0 w-full">
+                  {!markdownEditing ? (
+                    <article
+                      className={cn(
+                        "prose prose-invert max-w-none break-words whitespace-pre-wrap",
+                        densityClass
+                      )}
+                    >
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {activeNotes}
+                      </ReactMarkdown>
+                    </article>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label className="text-emerald-200">
+                        Edit Markdown (stored locally)
+                      </Label>
+                      <Textarea
+                        className={cn(
+                          emerald.border,
+                          "min-h-[320px] sm:min-h-[420px] bg-emerald-950/70 text-emerald-50 w-full"
+                        )}
+                        value={
+                          customNotes[activeUnit.id] ?? activeUnit.notes
+                        }
+                        onChange={(e) =>
+                          setCustomNotes((prev) => ({
+                            ...prev,
+                            [activeUnit.id]: e.target.value,
+                          }))
+                        }
+                      />
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          onClick={() => setMarkdownEditing(false)}
+                          className="bg-emerald-700 hover:bg-emerald-600"
+                        >
+                          Done
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className={emerald.border}
+                          onClick={() =>
+                            setCustomNotes((prev) => ({
+                              ...prev,
+                              [activeUnit.id]: "",
+                            }))
+                          }
+                        >
+                          Reset to Default
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          onClick={() =>
+                            copyToClipboard(
+                              customNotes[activeUnit.id] ??
+                                activeUnit.notes
+                            )
+                          }
+                          className="bg-emerald-800/60"
+                        >
+                          Copy
+                        </Button>
                       </div>
-                    </TabsContent>
+                    </div>
+                  )}
+                </div>
 
-                    {/* QUIZ */}
-                    <TabsContent value="quiz" className="pt-4">
-                      <Quiz unit={activeUnit} />
-                    </TabsContent>
+                {/* Sidebar widgets */}
+                <aside className="w-full lg:w-64 shrink-0 space-y-3">
+                  <Card className={cn(emerald.panel, emerald.border)}>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm text-emerald-100 flex items-center gap-2">
+                        <AlarmClock className="h-4 w-4" /> Study Timer
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <StudyTimer />
+                    </CardContent>
+                  </Card>
 
-                    {/* TASKS */}
-                    <TabsContent value="tasks" className="pt-4">
-                      <TaskList unitId={activeUnit.id} />
-                    </TabsContent>
+                  <Card className={cn(emerald.panel, emerald.border)}>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm text-emerald-100 flex items-center gap-2">
+                        <BrainCircuit className="h-4 w-4" /> Key Ideas
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <KeyIdeas unit={activeUnit} />
+                    </CardContent>
+                  </Card>
+                </aside>
+              </div>
+            </TabsContent>
 
-                    {/* RESOURCES */}
-                    <TabsContent value="resources" className="pt-4">
-                      <Resources unit={activeUnit} />
-                    </TabsContent>
-                  </Tabs>
-                )}
-              </CardContent>
-            </Card>
+            {/* QUIZ */}
+            <TabsContent value="quiz" className="pt-4">
+              <Quiz unit={activeUnit} />
+            </TabsContent>
+
+            {/* TASKS */}
+            <TabsContent value="tasks" className="pt-4">
+              <TaskList unitId={activeUnit.id} />
+            </TabsContent>
+
+            {/* RESOURCES */}
+            <TabsContent value="resources" className="pt-4">
+              <Resources unit={activeUnit} />
+            </TabsContent>
+          </Tabs>
+        )}
+      </CardContent>
+    </Card>
 
             {/* Footer */}
             <footer className="text-emerald-400/80 text-xs text-center py-6">
