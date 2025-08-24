@@ -253,7 +253,7 @@ while (1) {
 },
   {
   id: "unit2",
-  title: "UNIT II — Embedded C Programming & Applications",
+  title: "UNIT II — Embedded C  & Applications",
   topics: [
     "Features of Embedded Programming Languages",
     "C vs Embedded C",
@@ -263,7 +263,7 @@ while (1) {
     "Basic Programming Steps",
     "Advanced Techniques"
   ],
-  notes: `# UNIT II — Embedded C Programming & Applications
+  notes: `# UNIT II — Embedded C  & Applications
 
 ## Features of Embedded Programming Languages
 Embedded C programming languages are tailored to directly interact with hardware while maintaining predictable and efficient execution. Unlike general-purpose languages, embedded languages focus on **low-level control of microcontrollers and processors**, ensuring reliable timing and resource usage. They provide constructs for **bitwise operations, fixed-point arithmetic, and direct register access**, which are crucial for controlling peripherals and optimizing memory. Furthermore, embedded C has a **small runtime footprint** and avoids unnecessary abstraction layers, making it highly suitable for devices with limited memory and processing power.
@@ -468,14 +468,13 @@ These protocols ensure predictable execution and fairness in resource usage.
   - Schedule tasks to align with idle/sleep windows.
   - Balance latency vs. throughput depending on application domain.
 `
-}
-,
-  {
+},
+{
   id: "unit5",
   title: "UNIT V — Advanced Architectures",
   topics: [
     "ARM & ARM7 (LPC2148)",
-    "Networked Systems: I2C, CAN, RS232, USB, IrDA, Bluetooth",
+    "Networked Systems",
     "DSPs, FPGAs, ASICs",
     "SoC Architecture & On-Chip Interconnect",
     "SoC Case Study: Digital Camera"
@@ -483,117 +482,57 @@ These protocols ensure predictable execution and fairness in resource usage.
   notes: `# UNIT V — Advanced Architectures
 
 ## ARM & ARM7 (LPC2148)
-The ARM7TDMI is a widely used RISC processor core with the following features:
-- **ARM & Thumb ISA**: Supports both 32-bit ARM and 16-bit Thumb instructions for efficiency.  
-- **LPC2148 Microcontroller**: Based on ARM7TDMI-S core, clocked with a **PLL** up to 60 MHz.  
-- **Peripherals**: Timers, UART, I2C, SPI, ADC, DAC, PWM, and watchdog timers.  
-- **Interrupt System**: Vectored Interrupt Controller (VIC) allows prioritization of interrupts.  
-- **Low Power**: Idle and power-down modes suitable for embedded applications.  
+The ARM7 family, particularly the ARM7TDMI core, represents a widely adopted 32-bit RISC architecture designed for embedded systems. It uses a 3-stage pipeline and supports both 32-bit ARM instructions and 16-bit Thumb instructions, making it efficient in terms of performance and code density. The LPC2148, based on ARM7, integrates several on-chip peripherals such as UART, SPI, I²C, ADC, DAC, PWM, timers, and a watchdog timer. It also features a Vector Interrupt Controller for fast and prioritized interrupt handling, and PLL circuits for clock scaling.  
 
-Applications: industrial control, motor drivers, IoT gateways, and portable devices.  
+- Compact and efficient design suitable for real-time embedded systems.  
+- Thumb instruction set improves memory efficiency.  
+- Vectored interrupts enable low-latency response.  
 
----
+## Networked Systems
+Modern embedded devices often rely on multiple communication protocols. I²C provides a simple two-wire bus system supporting multiple masters and slaves, making it ideal for sensor networks. CAN is robust, supporting error detection and reliable communication in automotive and industrial systems. RS232, although legacy, remains in use for debugging and console ports. USB is the most versatile, supporting a wide range of peripherals with high data rates. IrDA uses infrared for short-range line-of-sight communication, while Bluetooth dominates in wireless short-range connectivity, especially in IoT and consumer electronics.  
 
-## Buses & Connectivity
-
-### I²C (Inter-Integrated Circuit)
-- **Two-wire bus**: SDA (data), SCL (clock).  
-- Supports **multi-master, multi-slave** communication.  
-- Speed grades: **Standard (100 kHz), Fast (400 kHz), Fast+ (1 MHz), High-speed (3.4 MHz)**.  
-- Applications: EEPROM, sensors, RTC modules.  
-
-### CAN (Controller Area Network)
-- Robust, differential signaling protocol.  
-- **Arbitration** via dominant/recessive bits, ensures priority without data loss.  
-- Features: CRC error detection, automatic retransmission.  
-- Common in **automotive, avionics, industrial automation**.  
-
-### RS-232
-- Legacy point-to-point serial communication.  
-- Voltage levels: **+3V to +15V (logic 0)**, **-3V to -15V (logic 1)**.  
-- Low cost but limited to short distances and low data rates.  
-
-### USB (Universal Serial Bus)
-- **Host-centric** protocol with device enumeration.  
-- Communication via **endpoints**.  
-- Transfer types: Control, Bulk, Isochronous, Interrupt.  
-- Applications: keyboards, storage, cameras, mobile devices.  
-
-### IrDA (Infrared Data Association)
-- Short-range, **line-of-sight** wireless protocol.  
-- Speeds up to 16 Mbps.  
-- Historically used in PDAs, printers, laptops.  
-
-### Bluetooth
-- 2.4 GHz wireless protocol.  
-- Modes: **Bluetooth Classic** (streaming, audio) and **BLE** (low-energy IoT).  
-- Uses **profiles** (e.g., GATT, A2DP) for interoperability.  
-- Applications: wearables, medical devices, IoT sensors.  
-
----
+- Protocols vary in speed, reliability, and use cases.  
+- USB and Bluetooth dominate modern consumer devices.  
+- CAN and I²C remain crucial in automotive and sensor networks.  
 
 ## DSPs, FPGAs, and ASICs
+Digital Signal Processors (DSPs) are specialized for handling mathematical operations like MAC (Multiply-Accumulate), making them ideal for audio, video, and control applications. FPGAs, in contrast, are reconfigurable logic devices capable of rapid prototyping and custom hardware acceleration. They are used extensively in networking and data-intensive applications. ASICs, while costly to develop, provide the most efficient and high-performance solutions for large-scale deployment in products like smartphones, GPUs, and AI accelerators.  
 
-### Digital Signal Processors (DSPs)
-- Specialized for **real-time signal processing**.  
-- Features:  
-  - **MAC (Multiply–Accumulate) units** for high-speed arithmetic.  
-  - **Circular buffers** for continuous data streams.  
-  - **Saturation arithmetic** prevents overflow errors.  
-- Applications: audio processing, image enhancement, communication systems.  
-
-### FPGAs (Field-Programmable Gate Arrays)
-- Reconfigurable hardware with logic blocks and interconnects.  
-- Supports **parallelism**, making them ideal for high-speed applications.  
-- Include **IP cores, DSP blocks, and high-level synthesis (HLS)** tools.  
-- Applications: prototyping, aerospace, AI accelerators.  
-
-### ASICs (Application-Specific Integrated Circuits)
-- Custom hardware designed for a dedicated function.  
-- Benefits: high performance, lower power consumption, reduced size.  
-- Drawbacks: **non-reconfigurable** and high upfront design cost.  
-- Applications: smartphones, GPUs, networking chips.  
-
----
+- DSPs excel in real-time signal processing.  
+- FPGAs provide flexibility for prototyping and specialized tasks.  
+- ASICs offer unmatched performance and efficiency at volume.  
 
 ## SoC Architecture & On-Chip Interconnect
-A **System-on-Chip (SoC)** integrates CPU, memory, peripherals, and accelerators on a single chip.  
-Key interconnect standards:
-- **AXI (Advanced eXtensible Interface):** High-performance, supports burst transfers, pipelining, and QoS.  
-- **AHB (Advanced High-performance Bus):** High-speed communication for system-level transfers.  
-- **APB (Advanced Peripheral Bus):** Low-power, simple interface for peripherals.  
-- **DMA (Direct Memory Access):** Enables high-speed data movement without CPU intervention.  
-- **Cache Coherency Mechanisms:** Ensure consistent data across multiple processors/cores.  
-- **Network-on-Chip (NoC):** Scalable interconnect fabric for modern multicore SoCs.  
+System-on-Chip (SoC) designs integrate multiple subsystems including CPUs, caches, memory controllers, accelerators, and I/O blocks on a single chip. Communication within the SoC is handled using bus protocols like AXI, AHB, and APB, each optimized for different levels of performance and power. Direct Memory Access (DMA) reduces CPU load by managing data transfers independently. Advanced SoCs also employ Network-on-Chip (NoC) architectures to overcome bandwidth bottlenecks while incorporating power-saving techniques such as DVFS and clock gating.  
 
----
+- SoCs combine computing, memory, and I/O into a single platform.  
+- AXI, AHB, and APB ensure efficient interconnect.  
+- NoC and DVFS address bandwidth and power challenges.  
 
-## Case Study: Digital Camera SoC
+## SoC Case Study: Digital Camera
 
-### Data Flow
-\`\`\`
-Image Sensor → ISP (Image Signal Processor) → Compression (JPEG/HEVC) 
-            → Memory Controller → Display/Storage
-\`\`\`
+\`\`\`c
+#define N 5
+int coeff[N] = {1, 2, 3, 2, 1};
+int buffer[N];
 
-### Processing Stages
-- **Image Sensor**: Captures raw pixel data (Bayer pattern).  
-- **ISP**: Performs **demosaicing, denoising, white balance, and sharpening**.  
-- **Compression Engine**: Converts to JPEG/HEVC for efficient storage.  
-- **Memory Subsystem**: High bandwidth required for multiple frames.  
-- **Display/Storage Interface**: Transfers processed images to LCD or SD card.  
-
-### Design Constraints
-- **Real-time deadlines**: Must process frames within 33 ms (30 fps).  
-- **Power efficiency**: Limited battery in portable cameras.  
-- **Thermal management**: Heat dissipation due to high computation.  
-- **Bandwidth requirements**: Multiple image pipelines accessing memory simultaneously.  
-
-This case study demonstrates the **integration of DSP, memory systems, and communication buses** in an SoC for real-world embedded applications.
-
----`
+int FIR_Filter(int input) {
+    int i, result = 0;
+    
+    return result;
 }
-,
+\`\`\`
+A digital camera SoC demonstrates the integration of multiple subsystems to meet real-time performance requirements. Image data flows from the sensor into an Image Signal Processor (ISP), where operations like demosaicing, noise reduction, and white balance are performed. Compression units handle JPEG for photos and H.264/HEVC for video. Memory controllers and DDR manage frame buffering, while output interfaces handle display, storage, or wireless transmission. Constraints include maintaining frame rates (e.g., 30 fps at 1080p), ensuring power efficiency for battery operation, and managing thermal performance.  
+
+- ISP ensures image quality through processing pipelines.  
+- Compression and memory systems enable real-time capture.  
+- Power and thermal constraints drive design optimizations.  
+
+
+`
+}
+
+
 ];
 
 /* ============================================================
@@ -1624,7 +1563,7 @@ export default function EmbeddedSyllabusPage() {
                          <Button
                             variant="ghost"
                             size="sm"
-                            className="justify-start cursor-pointer text-emerald-200 hover:text-emerald-700 w-full text-left overflow-hidden text-ellipsis whitespace-nowrap"
+                            className="justify-start cursor-pointer text-emerald-200 hover:text-emerald-700 w-full text-left  text-wrap "
                             onClick={() => {
                               setSelectedTopic((cur) => (cur === t ? null : t));
                               setTopicEditing(false);
@@ -1640,7 +1579,7 @@ export default function EmbeddedSyllabusPage() {
                           {selectedTopic === t && openUnit === u.id && (
                             <div className="mt-2 w-full rounded-xl border border-emerald-800/60 bg-black p-3">
                               <div className="flex flex-wrap items-center justify-between gap-2">
-                                <h4 className="text-emerald-500 font-semibold">
+                                <h4 className="text-emerald-500 text-wrap font-semibold">
                                   {t}
 
                                 </h4>
@@ -1682,26 +1621,26 @@ export default function EmbeddedSyllabusPage() {
                               remarkPlugins={[remarkGfm]}
                               components={{
                                 h1: ({node, ...props}) => (
-                                  <h1 className="text-emerald-300 text-xl font-bold mt-4 mb-2" {...props} />
+                                  <h1 className="text-emerald-300 text-xl text-wrap font-bold mt-4 mb-2" {...props} />
                                 ),
                                 h2: ({node, ...props}) => (
-                                  <h2 className="text-emerald-300 text-lg font-semibold mt-3 mb-2" {...props} />
+                                  <h2 className="text-emerald-300 text-wrap text-lg font-semibold mt-3 mb-2" {...props} />
                                 ),
                                 h3: ({node, ...props}) => (
-                                  <h3 className="text-emerald-300 text-base font-semibold mt-2 mb-1" {...props} />
+                                  <h3 className="text-emerald-300 text-wrap text-base font-semibold mt-2 mb-1" {...props} />
                                 ),
                                 p: ({node, ...props}) => (
-                                  <p className="text-emerald-300 leading-relaxed mb-2" {...props} />
+                                  <p className="text-emerald-300 text-wrap leading-relaxed mb-2" {...props} />
                                 ),
                                 ul: ({node, ...props}) => (
-                                  <ul className="list-disc list-inside text-emerald-100 mb-2 space-y-1" {...props} />
+                                  <ul className="list-disc list-inside text-wrap text-emerald-100 mb-2 space-y-1" {...props} />
                                 ),
                                 ol: ({node, ...props}) => (
-                                  <ol className="list-decimal list-inside text-emerald-100 mb-2 space-y-1" {...props} />
+                                  <ol className="list-decimal list-inside text-wrap text-emerald-100 mb-2 space-y-1" {...props} />
                                 ),
-                                li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                                li: ({node, ...props}) => <li className="mb-1 text-red text-wrap" {...props} />,
                                 strong: ({node, ...props}) => (
-                                  <strong className="text-emerald-200 font-semibold" {...props} />
+                                  <strong className="text-emerald-200  text-wrap font-semibold" {...props} />
                                 ),
                                 em: ({node, ...props}) => (
                                   <em className="italic text-emerald-300" {...props} />
@@ -1816,7 +1755,7 @@ export default function EmbeddedSyllabusPage() {
     </Card>
 
     {/* Bookmarks */}
-    <Card className={cn(emerald.panel, emerald.border)}>
+    <Card className={cn(emerald.panel,"overflow-auto", emerald.border)}>
       <CardHeader className="pb-2">
         <CardTitle className="text-emerald-100 flex items-center gap-2">
           <Star className="h-5 w-5" /> Bookmarks
@@ -1837,7 +1776,7 @@ export default function EmbeddedSyllabusPage() {
               <Button
                 key={id}
                 variant="secondary"
-                className="w-full justify-start cursor-pointer text-gray-300 bg-emerald-800/50 hover:bg-emerald-700/60"
+                className=" w-full justify-start text-wrap  cursor-pointer text-gray-300 bg-emerald-800/50 hover:bg-emerald-700/60"
                 onClick={() => setOpenUnit(u.id)}
               >
                 <Star className="h-4 w-4 mr-2" />
@@ -1985,33 +1924,33 @@ export default function EmbeddedSyllabusPage() {
                               remarkPlugins={[remarkGfm]}
                               components={{
                                 h1: ({node, ...props}) => (
-                                  <h1 className="text-emerald-300 text-xl font-bold " {...props} />
+                                  <h1 className="text-emerald-300 text-wrap text-xl font-bold " {...props} />
                                 ),
                                 h2: ({node, ...props}) => (
-                                  <h2 className="text-emerald-300 text-lg font-semibold " {...props} />
+                                  <h2 className="text-emerald-300 text-wrap text-lg font-semibold " {...props} />
                                 ),
                                 h3: ({node, ...props}) => (
-                                  <h3 className="text-emerald-300 text-base font-semibold " {...props} />
+                                  <h3 className="text-emerald-300 text-wrap text-base font-semibold " {...props} />
                                 ),
                                 p: ({node, ...props}) => (
-                                  <p className="text-emerald-300 leading-relaxed " {...props} />
+                                  <p className="text-emerald-300 text-wrap leading-relaxed " {...props} />
                                 ),
                                 ul: ({node, ...props}) => (
-                                  <ul className="list-disc list-inside text-emerald-100 " {...props} />
+                                  <ul className="list-disc list-inside text-wrap text-emerald-100 " {...props} />
                                 ),
                                 ol: ({node, ...props}) => (
-                                  <ol className="list-decimal list-inside text-emerald-100 " {...props} />
+                                  <ol className="list-decimal list-inside text-wrap text-emerald-100 " {...props} />
                                 ),
                                 li: ({node, ...props}) => <li  {...props} />,
                                 strong: ({node, ...props}) => (
-                                  <strong className="text-emerald-200 font-semibold" {...props} />
+                                  <strong className="text-emerald-200 text-wrap font-semibold" {...props} />
                                 ),
                                 em: ({node, ...props}) => (
-                                  <em className="italic text-emerald-300" {...props} />
+                                  <em className="italic text-wrap text-emerald-300" {...props} />
                                 ),
                                 blockquote: ({node, ...props}) => (
                                   <blockquote
-                                    className="border-l-4 border-emerald-500  italic text-emerald-300 my-3"
+                                    className="border-l-4 border-emerald-500 text-wrap  italic text-emerald-300 my-3"
                                     {...props}
                                   />
                                 ),
