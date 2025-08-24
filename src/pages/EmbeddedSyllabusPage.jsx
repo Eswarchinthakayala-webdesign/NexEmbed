@@ -90,6 +90,7 @@ import {
   Hourglass,
 } from "lucide-react";
 import rehypeHighlight from "rehype-highlight";
+import UNITS from "../data/units";
 /* ============================================================
    Emerald Dark Theme Helpers
    ============================================================ */
@@ -113,432 +114,7 @@ function cn(...cls) {
 /* ============================================================
    Course Content (Units + Markdown Notes)
    ============================================================ */
-const UNITS = [
-{
-  id: "unit1",
-  title: "UNIT I — Embedded Computing",
-  topics: [
-    "Introduction",
-    "Complex Systems and Microprocessor",
-    "Embedded System Design Process",
-    "Formalisms for System Design",
-    "Design Examples"
-  ],
-notes: `# UNIT I — Embedded Computing
 
-## Introduction
-Embedded computing is a specialized branch of computer engineering that focuses on designing dedicated hardware and software systems for specific tasks. Unlike general-purpose computers, which are built for versatility, embedded systems are optimized to meet strict constraints. These constraints may relate to time, where the system must meet real-time deadlines; power, where efficiency and battery longevity are crucial; memory, where only limited RAM and ROM are available; cost, where the bill of materials must remain low for large-scale production; and reliability, where the system must maintain stable and safe operation even in harsh environments. The fundamental goals of embedded systems are predictability, ensuring deterministic behavior under timing constraints; efficiency, with designs optimized for performance while consuming minimal resources; reliability and safety, which ensure the system avoids catastrophic failures; and maintainability, where systems can be updated with new firmware or diagnostics in the field.
-
----
-
-### Historical Evolution
-The evolution of embedded computing has been shaped by technological advances over the decades. In the 1970s, the introduction of 4-bit and 8-bit microcontrollers such as the Intel 4004 and the 8051 laid the foundation for embedded applications. During the 1980s and 1990s, the industry transitioned to more powerful 16-bit and 32-bit microcontrollers, accompanied by the adoption of early real-time operating systems (RTOS) and applications in fields like automotive engine control units (ECUs). The 2000s marked the dominance of ARM Cortex-M devices and the widespread integration of system-on-chip (SoC) solutions, which enabled higher performance in smaller, more efficient packages. In the 2010s and 2020s, embedded computing further expanded with the rise of the Internet of Things (IoT), wearable devices, and the integration of artificial intelligence accelerators within embedded systems.
-
----
-
-## Complex Systems and Microprocessor
-
-### Characteristics of Complex Embedded Systems
-Modern embedded systems are complex because they integrate sensing, actuation, computation, and communication in a tightly coordinated manner. They often involve heterogeneous hardware, combining microcontrollers, digital signal processors (DSPs), field-programmable gate arrays (FPGAs), and application-specific integrated circuits (ASICs) within a single design. These systems are frequently distributed, with multiple interconnected nodes communicating over buses such as CAN or networks like Ethernet and wireless protocols. Additionally, many applications demand strong safety and security guarantees, particularly in automotive, aerospace, and medical domains, which must comply with standards such as ISO 26262 or IEC 62304.
-
----
-
-### Microprocessor vs. Microcontroller
-A microprocessor is primarily CPU-centric and relies on external components such as RAM, Flash memory, and peripherals to function. This makes it suitable for high-performance applications like laptops, servers, or systems that run full operating systems such as Linux or Windows. By contrast, a microcontroller integrates the CPU, memory, and peripherals into a single chip, offering a compact and cost-effective solution. Microcontrollers are widely used in consumer appliances, IoT devices, and automotive ECUs because of their low power consumption, affordability, and ability to run real-time operating systems or bare-metal applications.
-
----
-
-### Metrics of Embedded Systems
-The performance and quality of an embedded system can be evaluated using a variety of metrics. Latency measures the time the system takes to respond to an event, while throughput quantifies the number of operations it can perform per unit of time. Jitter refers to the variability in timing, which must be minimized in real-time applications. Worst-case execution time (WCET) is critical for safety systems, ensuring deadlines are always met. Other metrics include energy per task, which reflects power efficiency; code size and memory footprint, which indicate resource usage; and mean time to failure (MTTF), which represents the system’s reliability and expected operational lifetime.
-
----
-
-
-## Embedded System Design Process
-
-### Design Flow Stages
-The embedded system design process begins with requirements analysis, where engineers identify both functional goals, such as the tasks the system must perform, and non-functional constraints, such as timing, power, safety, and cost. These are followed by a detailed specification, which defines system interfaces, timing diagrams, and communication protocols. Architecture design comes next, involving decisions about partitioning tasks between hardware and software, selecting an RTOS, defining communication stacks, and addressing security. Once the architecture is established, the system is implemented through the development of low-level drivers, hardware abstraction layers, middleware, and application logic. Verification ensures the correctness of the system through unit testing, integration testing, timing analysis, and fault injection. Finally, deployment and maintenance involve field updates via over-the-air mechanisms, remote diagnostics, and applying cybersecurity patches to keep the system secure and reliable throughout its lifecycle.
-
----
-
-### Tip
-Prototyping with development kits such as STM32 Nucleo or ESP32 boards allows rapid iteration and validation. Once the design stabilizes, engineers can transition to custom PCBs for production deployment.
-
----
-
-## Formalisms for System Design
-
-### State-based Modeling
-State-based models, particularly finite state machines (FSMs), are widely used in embedded design to represent systems with discrete states and predictable transitions. Extensions such as statecharts add hierarchy and parallelism, making them well suited for modeling complex systems such as communication protocols or user interfaces.
-
----
-
-### Dataflow Models
-Dataflow approaches represent computation as a network of operations connected by data streams. In synchronous dataflow (SDF), operations consume and produce data tokens at fixed rates, making it suitable for predictable applications such as digital filters. Kahn process networks (KPN) provide asynchronous communication between processes via FIFO channels, enabling efficient modeling of streaming applications like multimedia processing.
-
----
-
-### Petri Nets
-Petri nets provide a graphical and mathematical framework for representing concurrent systems. They consist of places representing states and transitions representing events. Their ability to capture concurrency, synchronization, and resource sharing makes them highly useful in embedded applications that require parallel processing.
-
----
-
-### UML/SysML
-Unified Modeling Language (UML) and Systems Modeling Language (SysML) offer a rich set of diagrams for system specification. Use-case diagrams capture functional requirements, sequence diagrams show message flows over time, activity diagrams illustrate workflows, and component diagrams represent system building blocks. Deployment diagrams further map software to hardware platforms, giving a complete architectural view.
-
----
-
-### Temporal Logic
-Temporal logic frameworks such as Linear Temporal Logic (LTL) and Computation Tree Logic (CTL) allow formal specification of system properties. They are particularly useful for defining safety properties, such as ensuring that undesirable events never occur, and liveness properties, which guarantee that desired events eventually happen.
-
----
-
-### Why Use Formalisms?
-By employing formal models, engineers gain predictability, analyzability, and testability, reducing ambiguity and making timing analysis easier. This approach often leads to correctness-by-construction, minimizing design flaws before implementation begins.
-
----
-
-## Design Examples
-
-### Example 1: Thermostat
-A thermostat system integrates a temperature sensor as input and uses a control algorithm such as PID to regulate a heating element. The outputs typically involve actuating a PWM-controlled heater and activating a safety relay. The system must operate with constraints such as maintaining ±1°C accuracy and incorporating fail-safe behavior if the sensor disconnects.
-
----
-
-### Example 2: Wearable Pedometer
-A wearable pedometer processes signals from an IMU that includes accelerometers and gyroscopes. The system applies filters to remove noise and detects peaks corresponding to steps. The output is presented as a step count and synchronized with a smartphone using Bluetooth Low Energy. Key design constraints include ultra-low power operation to ensure long battery life.
-
----
-
-### Example 3: Smart Irrigation System
-In a smart irrigation system, soil moisture sensors provide feedback, while weather forecast data may be integrated to optimize water usage. The system operates on low-power wireless networks such as LoRa, powered by solar energy. The actuators control water pumps to irrigate crops, and the system must operate reliably for years in remote field conditions.
-
----
-
-### Example 4: Pacemaker (Medical Device)
-A pacemaker monitors ECG signals to detect arrhythmias and provides electrical stimulation to regulate heartbeats. Because it directly sustains human life, its design must prioritize absolute safety, redundancy, and adherence to rigorous medical certification processes such as FDA approval.
-
----
-
-### Pseudo-code Example: Simple FSM for Traffic Light
-
-\`\`\`c
-enum State { RED, GREEN, YELLOW };
-State current = RED;
-
-while (1) {
-  switch (current) {
-    case RED:
-      turnOn(RED_LED);
-      wait(5000);
-      current = GREEN;
-      break;
-    case GREEN:
-      turnOn(GREEN_LED);
-      wait(3000);
-      current = YELLOW;
-      break;
-    case YELLOW:
-      turnOn(YELLOW_LED);
-      wait(2000);
-      current = RED;
-      break;
-  }
-}
-\`\`\`
-
----
-`
-
-},
-  {
-  id: "unit2",
-<<<<<<< HEAD
-  title: "UNIT II — Embedded C  & Applications",
-=======
-  title: "UNIT II — Embedded C & applications
-    ",
->>>>>>> 03d2a95a50c3ad19fc427a113b28a7b1cb6f5cf7
-  topics: [
-    "Features of Embedded Programming Languages",
-    "C vs Embedded C",
-    "Key Characteristics of Embedded C",
-    "Standard Embedded C Data Types",
-    "Block Diagram Explanation",
-    "Basic Programming Steps",
-    "Advanced Techniques"
-  ],
-  notes: `# UNIT II — Embedded C  & Applications
-
-## Features of Embedded Programming Languages
-Embedded C programming languages are tailored to directly interact with hardware while maintaining predictable and efficient execution. Unlike general-purpose languages, embedded languages focus on **low-level control of microcontrollers and processors**, ensuring reliable timing and resource usage. They provide constructs for **bitwise operations, fixed-point arithmetic, and direct register access**, which are crucial for controlling peripherals and optimizing memory. Furthermore, embedded C has a **small runtime footprint** and avoids unnecessary abstraction layers, making it highly suitable for devices with limited memory and processing power.
-
----
-
-## C vs. Embedded C
-Although Embedded C is derived from standard C, it diverges in design philosophy and execution environment. **Standard (hosted) C** typically assumes the presence of an operating system and full support for the C standard library, whereas **Embedded C** is considered a freestanding implementation, meaning it runs without an OS and often with restricted library support. Instead, embedded compilers provide **vendor-specific header files** that expose hardware features such as memory-mapped registers, timers, and interrupt controllers. For example, ARM-based microcontrollers use the **CMSIS (Cortex Microcontroller Software Interface Standard)** to define consistent register-level access. This enables developers to write portable yet hardware-aware programs.
-
----
-
-## Key Characteristics of Embedded C
-Embedded C emphasizes **deterministic execution** and minimal overhead. Programs are designed to meet real-time deadlines, so developers must carefully avoid practices like unbounded loops, heavy recursion, or dynamic memory allocation. A key feature of Embedded C is the use of the **volatile keyword**, which prevents the compiler from optimizing out hardware register reads and writes, ensuring correctness in I/O operations. Additionally, **interrupt service routines (ISRs)** must be kept short to reduce latency, with most processing deferred to background tasks or state machines. These design rules ensure reliability in systems where even microseconds of delay can lead to failures.
-
----
-
-## Standard Embedded C Data Types
-Portability is essential in embedded software, as applications often migrate across different microcontrollers. To maintain consistency, developers rely on **fixed-width data types** provided in the \`<stdint.h>\` header file, such as \`uint8_t\`, \`int16_t\`, and \`uint32_t\`. These ensure predictable memory sizes regardless of the platform. For example, a sensor driver written with \`uint16_t\` will behave consistently on both an 8-bit AVR and a 32-bit ARM Cortex-M microcontroller. This clarity reduces debugging time and improves code reliability across architectures.
-
----
-
-## Toolchain Block Diagram
-The development of embedded C programs follows a structured compilation toolchain:
-
-**Source Code (.c/.h)** → **Preprocessing** → **Compilation** → **Assembly** → **Linking/Locating** → **Executable (HEX/ELF)** → **Flashing to MCU** → **Execution on Target**
-
-This toolchain transforms high-level C code into machine instructions suitable for a specific microcontroller. The resulting **.hex or .elf files** are loaded into flash memory using programmers or debuggers (e.g., JTAG, SWD). Once flashed, the program executes directly on the target hardware.
-
----
-
-## Basic Programming Steps
-Writing an embedded application typically begins with **initialization of the system clock and peripherals**. Next, **low-level drivers** are developed to control GPIO, UART, I2C, SPI, or ADC/DAC interfaces. The core application logic often follows a **finite state machine (FSM) or statechart model**, ensuring predictable and maintainable control flow. After implementation, the system undergoes **on-target debugging and unit testing**, where breakpoints, logic analyzers, or oscilloscopes validate the software’s interaction with real hardware. These iterative steps allow developers to refine performance, power usage, and reliability.
-
----
-
-## Advanced Techniques
-To meet the growing complexity of modern embedded systems, advanced programming techniques are widely used. **DMA (Direct Memory Access)** pipelines, circular buffers, and double buffering schemes reduce CPU load and enable efficient data transfer. Power optimization strategies, such as **sleep modes, clock gating, and dynamic voltage scaling**, extend battery life in IoT and wearable devices. Code quality is enforced through **MISRA-C guidelines, static analysis tools, and code coverage metrics**, ensuring long-term safety and maintainability. These practices are especially critical in safety-critical industries such as automotive, aerospace, and medical devices.
-
----`
-}
-,{
-  id: "unit3",
-  title: "UNIT III — Introduction to RTOS",
-  topics: [
-    "Principles",
-    "Semaphores and Queues",
-    "Task and Task States",
-    "Tasks/Data & Shared Data",
-    "Message Queues, Mailboxes, Pipes",
-    "Timer Functions, Events, Memory Management",
-    "Interrupts in an RTOS",
-    "Real-time Periodicity & Scheduling (RMS, EDF)",
-    "Resource Sharing & Priority Inheritance"
-  ],
-  notes: `# UNIT III — Introduction to RTOS
-
-## Principles of RTOS
-A **Real-Time Operating System (RTOS)** provides deterministic and predictable task execution, making it essential for embedded systems where timing is critical. Its principles include:
-- **Preemptive, priority-based scheduling**: High-priority tasks can interrupt lower-priority ones, ensuring deadlines are met.  
-- **Bounded latency system calls**: Kernel functions execute within known time limits, enabling deterministic behavior.  
-- **Inter-process communication (IPC) mechanisms**: Semaphores, message queues, and events provide safe communication between tasks without data corruption.  
-
-The key distinction between an RTOS and a general-purpose OS is **determinism**—not throughput.
-
----
-
-## Tasks and Task States
-In RTOS, applications are divided into **tasks** (lightweight threads). Each task has its own **stack, priority, and control block**. A task can exist in multiple states:
-- **Ready**: Waiting to be scheduled.  
-- **Running**: Actively executing on the CPU.  
-- **Blocked**: Waiting for an event, semaphore, or resource.  
-- **Suspended**: Manually paused, not eligible for scheduling.  
-
-The **scheduler** determines task execution based on priority and system events, with **context switching** enabling multitasking.
-
----
-
-## Semaphores and Queues
-- **Semaphores**:  
-  - **Binary semaphore** acts as a signal (lock/unlock).  
-  - **Counting semaphore** tracks the availability of multiple identical resources.  
-- **Queues**: Provide a **FIFO mechanism** for message passing between tasks, avoiding race conditions in shared memory.  
-
-Semaphores prevent **race conditions**, while queues improve modularity by decoupling producer and consumer tasks.
-
----
-
-## Message Queues, Mailboxes, and Pipes
-- **Message Queues**: Store multiple fixed-size messages, suitable for asynchronous task communication.  
-- **Mailboxes**: Store a **single message slot** (overwrites old messages when new arrives).  
-- **Pipes**: Stream-oriented communication, enabling **byte or character streams** between tasks.  
-
-Choosing the right IPC mechanism depends on **data size, frequency, and synchronization needs**.
-
----
-
-## Timer Functions, Events, and Memory Management
-RTOS kernels use **timer services** to support periodic tasks:  
-- **Tick-based kernel**: Regular system tick interrupts drive scheduling.  
-- **Tickless kernel**: Saves power by waking only when required.  
-- **Event Groups**: Allow multiple tasks to wait on specific events (bitmask-based signaling).  
-- **Memory Management**: Instead of malloc/free, RTOS often uses **fixed-size memory pools**, ensuring O(1) allocation and avoiding fragmentation.
-
----
-
-## Interrupts in an RTOS
-Interrupt Service Routines (ISRs) are crucial in real-time systems, but they must be kept minimal:
-- Perform only **essential operations** inside ISRs.  
-- Defer heavy work to **tasks** using semaphores or queues.  
-- Avoid blocking calls and long execution inside ISRs to maintain **low interrupt latency**.  
-
----
-
-## Real-Time Scheduling (RMS & EDF)
-Two widely used scheduling algorithms:  
-
-- **Rate Monotonic Scheduling (RMS):**  
-  - Assigns **higher priority to tasks with shorter periods**.  
-  - Works best for **periodic, independent tasks**.  
-  - Utilization bound:  
-    \`U = n (2^(1/n) - 1)\`  
-    where *n* is the number of tasks. If total CPU utilization ≤ U, deadlines are guaranteed.  
-
-- **Earliest Deadline First (EDF):**  
-  - Dynamically assigns priority to tasks with **closest deadlines**.  
-  - More efficient than RMS; optimal for **uniprocessor scheduling**.  
-  - Handles higher CPU utilizations but requires **dynamic priority management**.  
-
----
-
-## Resource Sharing and Priority Inheritance
-When multiple tasks share resources (e.g., UART, sensors), improper handling can lead to **deadlocks** or **priority inversion** (low-priority task blocking a high-priority task).  
-Solutions include:  
-- **Priority Inheritance Protocol (PIP):** Temporarily boosts the priority of a low-priority task holding a resource.  
-- **Priority Ceiling Protocol (PCP):** Assigns each resource a maximum priority level to prevent deadlock.  
-- **Stack Resource Policy (SRP):** Ensures tasks only start when all resources they need are available.  
-
-These protocols ensure predictable execution and fairness in resource usage.
-
----`
-}
-,
-{
-  id: "unit4",
-  title: "UNIT IV — Hardware–Software Co-Design",
-  topics: [
-    "Memory & Power Optimization",
-    "Example RTOS: µC/OS",
-    "Development Tools: Host/Target, Linker/Locator",
-    "HW–SW Co-Simulation & Partitioning",
-    "Optimization Techniques: ILP, Kernighan–Lin, GA, PSO",
-    "Power-Aware & Functional Partitioning",
-  ],
-  notes: `# UNIT IV — Hardware–Software Co-Design
-
-## Memory & Power Optimization
-- **Memory Efficiency**: 
-  - Use fixed-size arrays, avoid fragmentation from dynamic memory.
-  - Compact data types (\`uint8_t\` vs \`int\`), lookup tables instead of recomputation.
-  - Code compression & link-time optimization (LTO).
-- **Power Efficiency**:
-  - Dynamic Voltage & Frequency Scaling (DVFS).
-  - Peripheral clock gating, sleep/standby modes.
-  - Sensor batching and event-driven I/O instead of polling.
-
-## Example RTOS: µC/OS
-- **µC/OS-II/III**:
-  - Portable, preemptive, priority-based kernel.
-  - Rich IPC: semaphores, mailboxes, queues.
-  - Deterministic scheduling suitable for safety-critical systems.
-- Widely used in automotive, avionics (DO-178B certifiable).
-
-## Development Tools
-- **Host Side**: IDE, compiler, emulator/simulator, debugging utilities.
-- **Target Side**: Embedded board, JTAG/SWD probe, on-chip debugger.
-- **Linker/Locator**:
-  - Memory maps (Flash, SRAM, peripherals).
-  - Section placement (\`.text\`, \`.data\`, \`.bss\`, stacks/heap).
-  - Overlaying unused memory regions for tighter fits.
-
-## HW–SW Co-Simulation & Partitioning
-- **Co-Simulation**:
-  - Transaction-Level Modeling (TLM) in SystemC.
-  - FPGA-in-the-loop to validate acceleration blocks.
-- **Partitioning**:
-  - HW for compute-intensive, parallel tasks (DSP/accelerator).
-  - SW for flexibility, control logic, OS services.
-  - Balance performance, power, cost.
-
-## Optimization Techniques
-- **ILP (Integer Linear Programming)**: exact mathematical formulation, optimal but NP-hard.
-- **Kernighan–Lin**: heuristic for graph-based partitioning (fast, scalable).
-- **Genetic Algorithms (GA)**: evolutionary meta-heuristic, explores large design spaces.
-- **Particle Swarm Optimization (PSO)**: swarm intelligence, converges quickly for HW–SW trade-offs.
-
-## Power-Aware & Functional Partitioning
-- **Power-Aware**:
-  - Clock gating & power domains, DVFS policies.
-  - Minimize switching activity in logic blocks.
-- **Functional Partitioning**:
-  - Group related tasks into clusters (cache-locality, bus optimization).
-  - Schedule tasks to align with idle/sleep windows.
-  - Balance latency vs. throughput depending on application domain.
-`
-},
-{
-  id: "unit5",
-  title: "UNIT V — Advanced Architectures",
-  topics: [
-    "ARM & ARM7 (LPC2148)",
-    "Networked Systems",
-    "DSPs, FPGAs, ASICs",
-    "SoC Architecture & On-Chip Interconnect",
-    "SoC Case Study: Digital Camera"
-  ],
-  notes: `# UNIT V — Advanced Architectures
-
-## ARM & ARM7 (LPC2148)
-The ARM7 family, particularly the ARM7TDMI core, represents a widely adopted 32-bit RISC architecture designed for embedded systems. It uses a 3-stage pipeline and supports both 32-bit ARM instructions and 16-bit Thumb instructions, making it efficient in terms of performance and code density. The LPC2148, based on ARM7, integrates several on-chip peripherals such as UART, SPI, I²C, ADC, DAC, PWM, timers, and a watchdog timer. It also features a Vector Interrupt Controller for fast and prioritized interrupt handling, and PLL circuits for clock scaling.  
-
-- Compact and efficient design suitable for real-time embedded systems.  
-- Thumb instruction set improves memory efficiency.  
-- Vectored interrupts enable low-latency response.  
-
-## Networked Systems
-Modern embedded devices often rely on multiple communication protocols. I²C provides a simple two-wire bus system supporting multiple masters and slaves, making it ideal for sensor networks. CAN is robust, supporting error detection and reliable communication in automotive and industrial systems. RS232, although legacy, remains in use for debugging and console ports. USB is the most versatile, supporting a wide range of peripherals with high data rates. IrDA uses infrared for short-range line-of-sight communication, while Bluetooth dominates in wireless short-range connectivity, especially in IoT and consumer electronics.  
-
-- Protocols vary in speed, reliability, and use cases.  
-- USB and Bluetooth dominate modern consumer devices.  
-- CAN and I²C remain crucial in automotive and sensor networks.  
-
-## DSPs, FPGAs, and ASICs
-Digital Signal Processors (DSPs) are specialized for handling mathematical operations like MAC (Multiply-Accumulate), making them ideal for audio, video, and control applications. FPGAs, in contrast, are reconfigurable logic devices capable of rapid prototyping and custom hardware acceleration. They are used extensively in networking and data-intensive applications. ASICs, while costly to develop, provide the most efficient and high-performance solutions for large-scale deployment in products like smartphones, GPUs, and AI accelerators.  
-
-- DSPs excel in real-time signal processing.  
-- FPGAs provide flexibility for prototyping and specialized tasks.  
-- ASICs offer unmatched performance and efficiency at volume.  
-
-## SoC Architecture & On-Chip Interconnect
-System-on-Chip (SoC) designs integrate multiple subsystems including CPUs, caches, memory controllers, accelerators, and I/O blocks on a single chip. Communication within the SoC is handled using bus protocols like AXI, AHB, and APB, each optimized for different levels of performance and power. Direct Memory Access (DMA) reduces CPU load by managing data transfers independently. Advanced SoCs also employ Network-on-Chip (NoC) architectures to overcome bandwidth bottlenecks while incorporating power-saving techniques such as DVFS and clock gating.  
-
-- SoCs combine computing, memory, and I/O into a single platform.  
-- AXI, AHB, and APB ensure efficient interconnect.  
-- NoC and DVFS address bandwidth and power challenges.  
-
-## SoC Case Study: Digital Camera
-
-\`\`\`c
-#define N 5
-int coeff[N] = {1, 2, 3, 2, 1};
-int buffer[N];
-
-int FIR_Filter(int input) {
-    int i, result = 0;
-    
-    return result;
-}
-\`\`\`
-A digital camera SoC demonstrates the integration of multiple subsystems to meet real-time performance requirements. Image data flows from the sensor into an Image Signal Processor (ISP), where operations like demosaicing, noise reduction, and white balance are performed. Compression units handle JPEG for photos and H.264/HEVC for video. Memory controllers and DDR manage frame buffering, while output interfaces handle display, storage, or wireless transmission. Constraints include maintaining frame rates (e.g., 30 fps at 1080p), ensuring power efficiency for battery operation, and managing thermal performance.  
-
-- ISP ensures image quality through processing pipelines.  
-- Compression and memory systems enable real-time capture.  
-- Power and thermal constraints drive design optimizations.  
-
-
-`
-}
-
-
-];
 
 /* ============================================================
    Local Storage Hook (JS version)
@@ -1622,72 +1198,56 @@ export default function EmbeddedSyllabusPage() {
 
                               {!topicEditing ? (
                                                     <div className="w-full text-sm mt-3  break-words whitespace-pre-wrap">
-                            <ReactMarkdown
-                              remarkPlugins={[remarkGfm]}
-                              components={{
-                                h1: ({node, ...props}) => (
-                                  <h1 className="text-emerald-300 text-xl text-wrap font-bold mt-4 mb-2" {...props} />
-                                ),
-                                h2: ({node, ...props}) => (
-                                  <h2 className="text-emerald-300 text-wrap text-lg font-semibold mt-3 mb-2" {...props} />
-                                ),
-                                h3: ({node, ...props}) => (
-                                  <h3 className="text-emerald-300 text-wrap text-base font-semibold mt-2 mb-1" {...props} />
-                                ),
-                                p: ({node, ...props}) => (
-                                  <p className="text-emerald-300 text-wrap leading-relaxed mb-2" {...props} />
-                                ),
-                                ul: ({node, ...props}) => (
-                                  <ul className="list-disc list-inside text-wrap text-emerald-100 mb-2 space-y-1" {...props} />
-                                ),
-                                ol: ({node, ...props}) => (
-                                  <ol className="list-decimal list-inside text-wrap text-emerald-100 mb-2 space-y-1" {...props} />
-                                ),
-                                li: ({node, ...props}) => <li className="mb-1 text-red text-wrap" {...props} />,
-                                strong: ({node, ...props}) => (
-                                  <strong className="text-emerald-200  text-wrap font-semibold" {...props} />
-                                ),
-                                em: ({node, ...props}) => (
-                                  <em className="italic text-emerald-300" {...props} />
-                                ),
-                                blockquote: ({node, ...props}) => (
-                                  <blockquote
-                                    className="border-l-4 border-emerald-500 pl-3 italic text-emerald-300 my-3"
-                                    {...props}
-                                  />
-                                ),
-                                code({node, inline, className, children, ...props}) {
-                                  const match = /language-(\w+)/.exec(className || "");
-                                  return !inline && match ? (
-                                    <SyntaxHighlighter
-                                      style={vscDarkPlus}
-                                      language={match[1]}
-                                      PreTag="div"
-                                      wrapLongLines
-                                      customStyle={{
-                                        margin: "0.75rem 0",
-                                        borderRadius: "0.5rem",
-                                        padding: "1rem",
-                                        fontSize: "0.85rem",
-                                        background: "#1e1e1e",
-                                      }}
-                                      {...props}
-                                    >
-                                      {String(children).replace(/\n$/, "")}
-                                    </SyntaxHighlighter>
-                                  ) : (
-                                    <code
-                                      className="bg-emerald-900/60 px-1.5 py-0.5 rounded font-mono text-emerald-200"
-                                      {...props}
-                                    >
-                                      {children}
-                                    </code>
-                                  );
-                                },
-                              }}
-                            >
-                              {activeTopicNotes}
-                            </ReactMarkdown>
+                            <CardContent className="prose prose-invert w-full p-4 text-zinc-100 min-h-[300px]">
+  <ReactMarkdown
+    remarkPlugins={[remarkGfm]}
+    rehypePlugins={[rehypeHighlight]}
+    components={{
+
+       h1: ({node, ...props}) => (
+        <h1 className="text-emerald-500 text-2xl font-bold mb-3" {...props} />
+      ),
+      h2: ({node, ...props}) => (
+        <h2 className="text-emerald-400 text-xl font-semibold mt-4 mb-2" {...props} />
+      ),
+      h3: ({node, ...props}) => (
+        <h3 className="text-emerald-300 text-lg font-medium mt-3 mb-1" {...props} />
+      ),
+       p: ({node, ...props}) => (
+        <p className="text-emerald-200 leading-relaxed mb-2" {...props} />
+      ),
+
+      // Lists
+      ul: ({node, ...props}) => (
+        <ul className="list-disc list-inside text-zinc-100 space-y-1" {...props} />
+      ),
+      ol: ({node, ...props}) => (
+        <ol className="list-decimal list-inside text-zinc-300 space-y-1" {...props} />
+      ),
+
+      pre: ({node, ...props}) => (
+        <pre
+          className="w-full max-w-full overflow-x-auto mt-4 rounded-lg bg-zinc-900 p-3 text-sm"
+          {...props}
+        />
+      ),
+      code: ({node, inline, className, children, ...props}) => {
+        return inline ? (
+          <code className="bg-zinc-800 px-1.5 py-0.5 rounded text-emerald-300" {...props}>
+            {children}
+          </code>
+        ) : (
+          <code className="block text-emerald-200 font-mono whitespace-pre-wrap break-words" {...props}>
+            {children}
+          </code>
+        );
+      },
+    }}
+  >
+    {activeTopicNotes}
+  </ReactMarkdown>
+</CardContent>
+
                           </div>
                               ) : (
                                 <div className="mt-3 space-y-2">
@@ -1781,13 +1341,8 @@ export default function EmbeddedSyllabusPage() {
               <Button
                 key={id}
                 variant="secondary"
-<<<<<<< HEAD
                 className=" w-full justify-start text-wrap  cursor-pointer text-gray-300 bg-emerald-800/50 hover:bg-emerald-700/60"
-=======
-                className="w-full text-wrap justify-start cursor-pointer text-gray-300 bg-emerald-800/50 hover:bg-emerald-700/60"
->>>>>>> 03d2a95a50c3ad19fc427a113b28a7b1cb6f5cf7
-                onClick={() => setOpenUnit(u.id)}
-              >
+                onClick={() => setOpenUnit(u.id)} >
                 <Star className="h-4 w-4 mr-2" />
                 {u.title}
               </Button>
@@ -1923,79 +1478,57 @@ export default function EmbeddedSyllabusPage() {
               <div className="flex flex-col lg:flex-row rounded-2xl border border-emerald-400/50 bg-black/50 items-start gap-6">
                 <div className="flex-1 min-w-0 p-5 w-full">
                   {!markdownEditing ? (
-                    <article
-                      className={cn(
-                        "prose prose-invert max-w-none break-words whitespace-pre-wrap",
-                        densityClass
-                      )}
-                    >
-                       <ReactMarkdown
-                              remarkPlugins={[remarkGfm]}
-                              components={{
-                                h1: ({node, ...props}) => (
-                                  <h1 className="text-emerald-300 text-wrap text-xl font-bold " {...props} />
-                                ),
-                                h2: ({node, ...props}) => (
-                                  <h2 className="text-emerald-300 text-wrap text-lg font-semibold " {...props} />
-                                ),
-                                h3: ({node, ...props}) => (
-                                  <h3 className="text-emerald-300 text-wrap text-base font-semibold " {...props} />
-                                ),
-                                p: ({node, ...props}) => (
-                                  <p className="text-emerald-300 text-wrap leading-relaxed " {...props} />
-                                ),
-                                ul: ({node, ...props}) => (
-                                  <ul className="list-disc list-inside text-wrap text-emerald-100 " {...props} />
-                                ),
-                                ol: ({node, ...props}) => (
-                                  <ol className="list-decimal list-inside text-wrap text-emerald-100 " {...props} />
-                                ),
-                                li: ({node, ...props}) => <li  {...props} />,
-                                strong: ({node, ...props}) => (
-                                  <strong className="text-emerald-200 text-wrap font-semibold" {...props} />
-                                ),
-                                em: ({node, ...props}) => (
-                                  <em className="italic text-wrap text-emerald-300" {...props} />
-                                ),
-                                blockquote: ({node, ...props}) => (
-                                  <blockquote
-                                    className="border-l-4 border-emerald-500 text-wrap  italic text-emerald-300 my-3"
-                                    {...props}
-                                  />
-                                ),
-                                code({node, inline, className, children, ...props}) {
-                                  const match = /language-(\w+)/.exec(className || "");
-                                  return !inline && match ? (
-                                    <SyntaxHighlighter
-                                      style={vscDarkPlus}
-                                      language={match[1]}
-                                      PreTag="div"
-                                      wrapLongLines
-                                      customStyle={{
-                                        margin: "0.75rem 0",
-                                        borderRadius: "0.5rem",
-                                        padding: "1rem",
-                                        fontSize: "0.85rem",
-                                        background: "#1e1e1e",
-                                      }}
-                                      {...props}
-                                    >
-                                      {String(children).replace(/\n$/, "")}
-                                    </SyntaxHighlighter>
-                                  ) : (
-                                    <code
-                                      className="bg-emerald-900/60 px-1.5 py-0.5 rounded font-mono text-emerald-200"
-                                      {...props}
-                                    >
-                                      {children}
-                                    </code>
-                                  );
-                                },
-                              }}
-                            >
-                              {activeNotes}
-                            </ReactMarkdown>
-                    </article>
+                       <CardContent className="prose prose-invert w-full p-4 text-zinc-100 min-h-[300px]">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeHighlight]}
+                components={{
+                   h1: ({node, ...props}) => (
+        <h1 className="text-emerald-500 text-2xl font-bold mb-3" {...props} />
+      ),
+      h2: ({node, ...props}) => (
+        <h2 className="text-emerald-400 text-xl font-semibold mt-4 mb-2" {...props} />
+      ),
+      h3: ({node, ...props}) => (
+        <h3 className="text-emerald-300 text-lg font-medium mt-3 mb-1" {...props} />
+      ),
+       p: ({node, ...props}) => (
+        <p className="text-emerald-200 leading-relaxed mb-2" {...props} />
+      ),
+
+      // Lists
+      ul: ({node, ...props}) => (
+        <ul className="list-disc list-inside text-zinc-300 space-y-1" {...props} />
+      ),
+      ol: ({node, ...props}) => (
+        <ol className="list-decimal list-inside text-zinc-300 space-y-1" {...props} />
+      ),
+
+
+                  pre: ({node, ...props}) => (
+                    <pre
+                      className="w-full max-w-full mt-4 overflow-x-auto rounded-lg bg-zinc-900 p-3 text-sm"
+                      {...props}
+                    />
+                  ),
+                  code: ({node, inline, className, children, ...props}) => {
+                    return inline ? (
+                      <code className="bg-zinc-800 px-1.5 py-0.5 rounded text-emerald-300" {...props}>
+                        {children}
+                      </code>
+        ) : (
+          <code className="block text-emerald-200 font-mono whitespace-pre-wrap break-words" {...props}>
+            {children}
+          </code>
+        );
+      },
+    }}
+  >
+    {activeNotes}
+  </ReactMarkdown>
+</CardContent>
+
+                    
                   ) : (
                     <div className="space-y-2">
                       <Label className="text-emerald-200">

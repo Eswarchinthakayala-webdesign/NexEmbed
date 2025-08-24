@@ -167,25 +167,6 @@
   animation: dash 1s linear infinite;
 }
 
-/* globals.css or tailwind.css */
-.hljs {
-  color: #ffffff !important; /* force white text */
-  background: transparent !important; /* no background override */
-}
 
-/* keywords, strings, etc. keep highlight colors */
-.hljs-keyword,
-.hljs-selector-tag,
-.hljs-literal,
-.hljs-section,
-.hljs-link {
-  color: #4ade80 !important; /* emerald accent */
-}
+/* globals.css */
 
-.hljs-string,
-.hljs-title,
-.hljs-name,
-.hljs-type,
-.hljs-attribute {
-  color: #34d399 !important; /* softer emerald */
-}
