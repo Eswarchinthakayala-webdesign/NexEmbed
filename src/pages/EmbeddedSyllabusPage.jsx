@@ -1776,11 +1776,7 @@ export default function EmbeddedSyllabusPage() {
               <Button
                 key={id}
                 variant="secondary"
-<<<<<<< HEAD
                 className=" w-full justify-start text-wrap  cursor-pointer text-gray-300 bg-emerald-800/50 hover:bg-emerald-700/60"
-=======
-                className="w-full text-wrap justify-start cursor-pointer text-gray-300 bg-emerald-800/50 hover:bg-emerald-700/60"
->>>>>>> 03d2a95a50c3ad19fc427a113b28a7b1cb6f5cf7
                 onClick={() => setOpenUnit(u.id)}
               >
                 <Star className="h-4 w-4 mr-2" />
