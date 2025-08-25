@@ -20,6 +20,7 @@ import {
   Info,
   FileQuestionMark,
   LifeBuoy,
+  FlaskConical,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -33,6 +34,7 @@ export default function Sidebar() {
   { name: "Details", path: "/details",icon:<Info size={20}/> },
   {name:"Syllabus",path:"/syllabus",icon:<FileText size={20}/>},
   {name:"Quiz",path:"/quiz",icon:<FileQuestionMark size={20}/>},
+  {name:"Lab",path:"/lab",icon:<FlaskConical size={20}/>},
   { name: "Help", path: "/help",icon:<LifeBuoy size={20}/> },
   ];
 
