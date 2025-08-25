@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Sidebar from "../components/Sidebar";
 
 const faqs = [
   {
@@ -33,6 +34,7 @@ export default function HelpPage() {
 
   return (
     <div className="min-h-screen pt-28 pb-16 bg-black text-gray-100">
+      <Sidebar/>
       <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* LEFT SIDE */}
         <div className="space-y-10">

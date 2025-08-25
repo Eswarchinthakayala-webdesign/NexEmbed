@@ -63,6 +63,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { ThreeBoard } from "../components/ThreeBoard";
 import { useNavigate } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
 // ---------------- THEME & CONSTANTS ----------------
 const SURFACE = "bg-emerald-950 text-emerald-50";
 const PANEL = "bg-emerald-900/40 border border-emerald-800/60";
@@ -534,6 +535,7 @@ setSelectedId("stm32");
 
   return (
     <div className={`min-h-[calc(100vh-120px)] pt-20 ${SURFACE} ${GRID_BG}`}>
+     
       {/* Top bar */}
       <div className="mx-auto max-w-8xl px-4 pt-6 pb-3">
         <div className="flex items-center gap-3">

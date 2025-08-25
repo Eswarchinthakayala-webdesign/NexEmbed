@@ -18,6 +18,7 @@ import WeatherStationSimulator from "./pages/WeatherStationSimulator";
 import DetailsPage from "./pages/DetailsPage";
 import EmbeddedESQuizPro from "./pages/EmbeddedESQuizPro";
 import EmbeddedSyllabusPage from "./pages/EmbeddedSyllabusPage";
+import NexEmbedLab from "./pages/NexEmbedLab";
 // Sonner
 import { Toaster } from "sonner";
 
@@ -51,6 +52,8 @@ function App() {
             <Route path="/details" element={<DetailsPage/>}/>
             <Route path="/quiz" element={<EmbeddedESQuizPro/>}/>
             <Route path="/syllabus" element={<EmbeddedSyllabusPage/>}/>
+            <Route path="/lab" element={<NexEmbedLab/>} />
+         
           </Routes>
         </main>
 

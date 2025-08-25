@@ -54,6 +54,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import QuizLanding from "../components/QuizLanding";
+import Sidebar from "../components/Sidebar";
 /* ------------------------------ Theme tokens ------------------------------ */
 const brand = {
   bg: "#0b1016", // base background (very dark blue/green)
@@ -1184,7 +1185,7 @@ export default function LandingPage() {
       className="relative min-h-screen overflow-hidden"
       style={{ background: brand.bg, color: brand.text }}
     >
-     
+     <Sidebar/>
 
       {/* Subtle grid overlay */}
       <div

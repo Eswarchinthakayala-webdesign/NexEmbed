@@ -9,9 +9,6 @@ const navLinks = [
   { name: "Home", path: "/",icon:<Home size={20}/> },
   { name: "Simulator", path: "/simulator",icon:<Computer size={20}/> },
   { name: "Projects", path: "/projects",icon:<FolderKanban size={20}/> },
-  { name: "Details", path: "/details",icon:<Info size={20}/> },
-  {name:"Syllabus",path:"/syllabus",icon:<FileText size={20}/>},
-  {name:"Quiz",path:"/quiz",icon:<FileQuestionMark size={20}/>},
   { name: "Help", path: "/help",icon:<LifeBuoy size={20}/> },
 ];
 

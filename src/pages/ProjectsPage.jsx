@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Cpu, Waves, Lock, ThermometerSun } from "lucide-react";
 import { Canvas } from "@react-three/fiber";
 import { Points, PointMaterial, OrbitControls } from "@react-three/drei";
+import Sidebar from "../components/Sidebar";
 
 /**
  * Emerald dark hero background using Three.js
@@ -78,6 +79,7 @@ export default function ProjectsPage() {
 
   return (
     <div className="relative min-h-screen bg-black text-emerald-50 ">
+      <Sidebar/>
       <EmeraldParticles />
 
       {/* Header */}

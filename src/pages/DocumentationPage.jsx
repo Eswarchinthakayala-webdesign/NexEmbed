@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"; // shadcn wrapper
+import Sidebar from "../components/Sidebar";
 // (ScrollArea should render Radix scroll area internally. We'll query for the viewport.)
 
 /* --------------------------- Documentation data -------------------------- */
@@ -249,6 +250,7 @@ export default function DocumentationPage() {
 
   return (
     <div className="relative flex pt-26 min-h-screen bg-black text-gray-100">
+      <Sidebar/>
       {/* Sidebar */}
       <aside className="fixed top-24 left-6 w-64 hidden border-1 border-emerald-500/50 rounded-2xl p-3 lg:flex flex-col gap-3 z-40">
         {sidebar}

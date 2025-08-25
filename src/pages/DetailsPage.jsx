@@ -48,6 +48,7 @@ import {
 } from "lucide-react";
 import * as THREE from "three";
 import { useNavigate } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
 
 /*
   Embedded System Dashboard — Final single-file version
@@ -621,6 +622,7 @@ export default function DetailsPage() {
 
   return (
     <div className={`bg-gray-950 ${EMERALD.text} pt-20 min-h-screen`}> 
+    <Sidebar/>
       <Header onOpenDocs={() => setOpenDocs((v) => !v)} />
 
       <main className="max-w-8xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6">

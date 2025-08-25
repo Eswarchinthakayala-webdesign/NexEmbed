@@ -91,6 +91,7 @@ import {
 } from "lucide-react";
 import rehypeHighlight from "rehype-highlight";
 import UNITS from "../data/units";
+import Sidebar from "../components/Sidebar";
 /* ============================================================
    Emerald Dark Theme Helpers
    ============================================================ */
@@ -850,6 +851,7 @@ export default function EmbeddedSyllabusPage() {
   return (
     <TooltipProvider>
       <div className={cn(emerald.bg, emerald.text, "min-h-screen pt-20 w-full relative overflow-hidden", contrastClass)}>
+        <Sidebar/>
         {/* 3D Background */}
         <Scene3D intensity={animIntensity} />
         <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-emerald-900/40 via-emerald-950 to-black" />

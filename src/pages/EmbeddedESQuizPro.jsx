@@ -61,6 +61,7 @@ import {
   BadgePlus,
   ChevronLeft,
 } from "lucide-react";
+import Sidebar from "../components/Sidebar";
 
 /**
  * Embedded Quiz Pro (ENV-based, Fully Responsive) — Single-file React component (~1000 lines)
@@ -727,6 +728,7 @@ export default function EmbeddedQuizPro() {
 
   return (
     <div className="relative min-h-screen pt-25 overflow-hidden bg-emerald-950/50">
+      <Sidebar/>
       <Background3D />
 
       {/* Gradient veil */}
